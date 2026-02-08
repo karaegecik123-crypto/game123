@@ -3,40 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benim Dünyam | Oyunlar & Günlükler v1.0.3</title>
+    <title>Benim Dünyam | Oyunlar & Notlar v1.0.4</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --dark: #1a1a2e; --blue: #0f3460; --accent: #e94560; --text: #e2e2e2; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #16213e; color: var(--text); overflow-x: hidden; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #16213e; color: var(--text); }
         
         header { background: var(--dark); color: white; padding: 10px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); }
         .nav-left { cursor: pointer; font-weight: bold; font-size: 1.2rem; }
-        .nav-right { display: flex; align-items: center; gap: 15px; }
-        .version { background: var(--accent); padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; box-shadow: 0 0 10px var(--accent); }
-        .btn-logs { background: var(--blue); color: white; border: 1px solid var(--accent); padding: 8px 15px; border-radius: 5px; cursor: pointer; transition: 0.3s; }
-        .btn-logs:hover { background: var(--accent); }
+        .nav-right { display: flex; align-items: center; gap: 10px; }
+        
+        /* Versiyon ve Bilgi Butonu */
+        .version-group { display: flex; align-items: center; background: var(--accent); border-radius: 20px; padding: 3px 10px; gap: 5px; }
+        .version { font-size: 12px; font-weight: bold; }
+        .info-btn { cursor: pointer; font-size: 14px; color: white; border: none; background: none; }
+
+        .btn-logs { background: var(--blue); color: white; border: 1px solid var(--accent); padding: 8px 15px; border-radius: 5px; cursor: pointer; }
 
         .container { max-width: 900px; margin: 30px auto; text-align: center; padding: 20px; }
         .welcome-box { background: var(--dark); padding: 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 30px; }
         
         .middle-menu { display: flex; justify-content: center; gap: 20px; margin-top: 30px; }
-        .menu-card { background: var(--blue); color: white; padding: 25px; border-radius: 15px; cursor: pointer; transition: 0.3s; flex: 1; border: 1px solid transparent; }
-        .menu-card:hover { transform: scale(1.05); border-color: var(--accent); box-shadow: 0 0 15px var(--accent); }
+        .menu-card { background: var(--blue); color: white; padding: 25px; border-radius: 15px; cursor: pointer; transition: 0.3s; flex: 1; }
+        .menu-card:hover { transform: scale(1.05); border: 1px solid var(--accent); }
 
+        /* Oyunlar */
         .game-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 30px; }
-        .game-item { background: var(--dark); padding: 15px; border-radius: 10px; cursor: pointer; border: 1px solid #444; transition: 0.3s; }
-        .game-item:hover { border-color: var(--accent); background: #1f1f3d; }
+        .game-item { background: var(--dark); padding: 15px; border-radius: 10px; cursor: pointer; border: 1px solid #444; }
         .game-item i { font-size: 2.5rem; margin-bottom: 10px; display: block; }
 
-        /* Oyun Sahnesi */
-        #game-stage { background: #000; margin: 20px auto; display: none; border: 3px solid var(--accent); width: 400px; height: 400px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-        canvas { display: block; }
+        /* Not Defteri (Günlükler) */
+        #diary-area { background: var(--dark); padding: 20px; border-radius: 15px; border: 1px solid var(--accent); }
+        textarea { width: 90%; height: 150px; background: #0f3460; color: white; border: 1px solid #444; padding: 10px; border-radius: 5px; margin-bottom: 10px; }
+        .log-list { text-align: left; margin-top: 20px; max-height: 300px; overflow-y: auto; }
+        .log-entry { background: #1f1f3d; padding: 10px; margin-bottom: 5px; border-left: 3px solid var(--accent); border-radius: 5px; }
+
+        /* Modal (Sürüm Bilgisi İçin) */
+        #version-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--dark); padding: 20px; border: 2px solid var(--accent); border-radius: 10px; z-index: 1000; width: 300px; }
+        .modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index: 999; }
+
+        #game-stage { background: #000; margin: 20px auto; display: none; border: 3px solid var(--accent); width: 400px; height: 400px; }
         .hidden { display: none; }
-        
-        /* Günlük Tablosu */
-        table { width: 100%; margin-top: 20px; border-collapse: collapse; background: var(--dark); color: white; }
-        th, td { padding: 12px; border: 1px solid #333; text-align: left; }
-        th { background: var(--blue); color: var(--accent); }
     </style>
 </head>
 <body>
@@ -44,8 +51,11 @@
 <header>
     <div class="nav-left" onclick="showHome()"><i class="fas fa-terminal"></i> Benim Dünyam</div>
     <div class="nav-right">
-        <span class="version">v1.0.3</span>
-        <button class="btn-logs" onclick="showSection('logs')">Günlükler</button>
+        <div class="version-group">
+            <span class="version">v1.0.4</span>
+            <button class="info-btn" onclick="toggleModal()"><i class="fas fa-info-circle"></i></button>
+        </div>
+        <button class="btn-logs" onclick="showSection('diary-area')">Günlükler</button>
     </div>
 </header>
 
@@ -53,72 +63,92 @@
     <div id="home-content">
         <div class="welcome-box">
             <h1 style="color: var(--accent);">Hoş Geldin! 🚀</h1>
-            <p>Burası benim her şeyi topladığım ana merkezim. Oyunlar oynayabilir, notlarıma göz atabilirsin.</p>
-            <hr style="border: 0.5px solid #333;">
-            <h3>Proje Hakkında</h3>
-            <p>Bu site tamamen tarafımdan, adım adım geliştirilmektedir. Her güncellemede yeni bir özellik ekliyorum.</p>
+            <p>Burası benim dijital dünyam. Sağ üstten günlük tutabilir veya oyun oynayabilirsin.</p>
+            <h3>Hakkımda</h3>
+            <p>Sürekli gelişen ve güncellenen bir platform projesi.</p>
         </div>
-        
         <div class="middle-menu">
-            <div class="menu-card" onclick="showSection('games-section')"><i class="fas fa-ghost"></i><br>Oyunlar</div>
-            <div class="menu-card" onclick="showSection('notes')"><i class="fas fa-pen-nib"></i><br>Notlar</div>
-            <div class="menu-card" onclick="showSection('movies')"><i class="fas fa-video"></i><br>Filmler</div>
+            <div class="menu-card" onclick="showSection('games-section')"><i class="fas fa-gamepad"></i><br>Oyunlar</div>
+            <div class="menu-card" onclick="showSection('notes')"><i class="fas fa-book-open"></i><br>Ders Notları</div>
+            <div class="menu-card" onclick="showSection('movies')"><i class="fas fa-film"></i><br>Filmler</div>
+        </div>
+    </div>
+
+    <div id="diary-area" class="hidden">
+        <button onclick="showHome()">Geri</button>
+        <h2>Günlük Notlarım</h2>
+        <textarea id="diaryInput" placeholder="Bugün neler yaptın?"></textarea><br>
+        <button class="btn-logs" onclick="saveLog()">Notu Ekle</button>
+        <div class="log-list" id="logList">
+            <div class="log-entry"><strong>08.02.2026:</strong> Sisteme giriş yapıldı.</div>
         </div>
     </div>
 
     <div id="games-section" class="hidden">
-        <button onclick="showHome()" style="background:none; color:var(--accent); border:1px solid var(--accent); padding:5px 10px; cursor:pointer; border-radius:5px;">⬅ Geri Dön</button>
-        <h2>Oyun Merkezi</h2>
+        <button onclick="showHome()">Geri</button>
+        <h2>Oyunlar</h2>
         <div class="game-options">
-            <div class="game-item" onclick="startSnake()"><i class="fas fa-worm" style="color: #2ecc71;"></i><p>Yılan</p></div>
-            <div class="game-item" onclick="startTetris()"><i class="fas fa-th-large" style="color: #9b59b6;"></i><p>Tetris</p></div>
-            <div class="game-item" onclick="startPacman()"><i class="fas fa-adjust" style="color: #f1c40f;"></i><p>Pacman</p></div>
+            <div class="game-item" onclick="startSnake()"><i class="fas fa-snake">🐍</i><p>Yılan</p></div>
+            <div class="game-item" onclick="alert('Tetris Yakında!')"><i class="fas fa-cube" style="color:#9b59b6"></i><p>Tetris</p></div>
+            <div class="game-item" onclick="alert('Pacman Yakında!')"><i class="fas fa-ghost" style="color:#f1c40f"></i><p>Pacman</p></div>
         </div>
         <div id="game-stage"><canvas id="gc" width="400" height="400"></canvas></div>
-        <p id="game-info" class="hidden" style="color:var(--accent); font-weight:bold;">Yön tuşlarını kullan!</p>
-    </div>
-
-    <div id="logs" class="hidden">
-        <button onclick="showHome()" style="margin-bottom:10px;">Geri</button>
-        <h2>Versiyon Geçmişi</h2>
-        <table>
-            <thead><tr><th>Tarih</th><th>Versiyon</th><th>Değişiklikler</th></tr></thead>
-            <tbody>
-                <tr><td>08.02.2026</td><td>1.0.3</td><td>Title "Benim Dünyam" olarak güncellendi. Tasarım koyu temaya (gaming style) çevrildi.</td></tr>
-                <tr><td>08.02.2026</td><td>1.0.2</td><td>Oyun altyapıları kuruldu.</td></tr>
-                <tr><td>07.02.2026</td><td>1.0.1</td><td>Menü yerleşimi düzenlendi.</td></tr>
-            </tbody>
-        </table>
     </div>
 
     <div id="notes" class="hidden"><h2>Ders Notları</h2><button onclick="showHome()">Geri</button></div>
     <div id="movies" class="hidden"><h2>Filmler</h2><button onclick="showHome()">Geri</button></div>
 </div>
 
+<div class="modal-overlay" id="overlay" onclick="toggleModal()"></div>
+<div id="version-modal">
+    <h3 style="color:var(--accent)">Sürüm Geçmişi</h3>
+    <hr>
+    <p><strong>v1.0.4:</strong> Günlük sistemi not defterine çevrildi, sürüm bilgisi "i" butonuna taşındı. Yılan ikonu eklendi.</p>
+    <p><strong>v1.0.3:</strong> Tasarım koyu temaya geçti.</p>
+    <button onclick="toggleModal()">Kapat</button>
+</div>
+
 <script>
-    let canv = document.getElementById("gc");
-    let ctx = canv.getContext("2d");
-    let gameInterval;
+    function toggleModal() {
+        let m = document.getElementById('version-modal');
+        let o = document.getElementById('overlay');
+        let isVis = m.style.display === 'block';
+        m.style.display = isVis ? 'none' : 'block';
+        o.style.display = isVis ? 'none' : 'block';
+    }
+
+    function saveLog() {
+        let input = document.getElementById('diaryInput');
+        if(!input.value) return;
+        let date = new Date().toLocaleDateString();
+        let div = document.createElement('div');
+        div.className = 'log-entry';
+        div.innerHTML = `<strong>${date}:</strong> ${input.value}`;
+        document.getElementById('logList').prepend(div);
+        input.value = "";
+    }
 
     function hideAll() {
-        clearInterval(gameInterval);
         document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden'));
         document.getElementById('game-stage').style.display = 'none';
-        document.getElementById('game-info').classList.add('hidden');
     }
 
     function showHome() { hideAll(); document.getElementById('home-content').classList.remove('hidden'); }
     function showSection(id) { hideAll(); document.getElementById(id).classList.remove('hidden'); }
 
     // --- YILAN OYUNU ---
-    let px=py=10, gs=20, tc=20, ax=ay=15, xv=yv=0, snake=[], tail=5;
+    let canv = document.getElementById("gc");
+    let ctx = canv.getContext("2d");
+    let px=py=10, gs=20, tc=20, ax=ay=15, xv=yv=0, snake=[], tail=5, gameInterval;
+
     function startSnake() {
         hideAll(); document.getElementById('games-section').classList.remove('hidden');
         document.getElementById('game-stage').style.display = 'block';
-        document.getElementById('game-info').classList.remove('hidden');
         xv=yv=0; px=py=10; tail=5; snake=[];
+        clearInterval(gameInterval);
         gameInterval = setInterval(updateSnake, 1000/15);
     }
+
     function updateSnake() {
         px+=xv; py+=yv;
         if(px<0) px=tc-1; if(px>tc-1) px=0; if(py<0) py=tc-1; if(py>tc-1) py=0;
@@ -134,15 +164,12 @@
         ctx.fillStyle="#e94560"; ctx.fillRect(ax*gs,ay*gs,gs-2,gs-2);
     }
 
-    function startTetris() { alert("Tetris yakında aktif edilecek!"); }
-    function startPacman() { alert("Pacman yakında aktif edilecek!"); }
-
     document.addEventListener("keydown", (e) => {
         switch(e.keyCode) {
-            case 37: xv=-1; yv=0; break;
-            case 38: xv=0; yv=-1; break;
-            case 39: xv=1; yv=0; break;
-            case 40: xv=0; yv=1; break;
+            case 37: if(xv!==1) {xv=-1; yv=0;} break;
+            case 38: if(yv!==1) {xv=0; yv=-1;} break;
+            case 39: if(xv!==-1) {xv=1; yv=0;} break;
+            case 40: if(yv!==-1) {xv=0; yv=1;} break;
         }
     });
 </script>
