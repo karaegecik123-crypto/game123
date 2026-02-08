@@ -3,269 +3,395 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dijital Dünya v1.3.0 | Sinek.io Elite</title>
+    <title>Dijital Dünya v1.5.0 | The Nexus</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --dark: #05050a; --accent: #e94560; --green: #00ff41; --panel: #1a1a2e; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--dark); color: #fff; overflow: hidden; }
+        :root { --dark: #020205; --accent: #e94560; --green: #00ff41; --panel: #16213e; --text: #e2e2e2; }
+        body { font-family: 'Inter', sans-serif; margin: 0; background: var(--dark); color: var(--text); overflow: hidden; }
         
-        /* UI Tasarım */
-        header { background: var(--panel); padding: 10px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); }
-        .container { display: flex; flex-direction: column; align-items: center; padding-top: 20px; }
+        /* Navigasyon */
+        header { background: rgba(22, 33, 62, 0.8); backdrop-filter: blur(10px); padding: 10px 5%; display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent); z-index: 1000; position: relative; }
+        .v-badge { background: var(--accent); padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.8rem; box-shadow: 0 0 10px var(--accent); }
+
+        .container { display: flex; flex-direction: column; align-items: center; padding-top: 20px; height: 100vh; perspective: 1000px; }
         
-        #game-wrapper { position: relative; display: flex; flex-direction: column; align-items: center; }
-        canvas { background: radial-gradient(circle, #0f0f1a 0%, #05050a 100%); border: 2px solid #333; cursor: crosshair; }
+        /* Oyun Seçici */
+        .game-nav { display: flex; gap: 15px; margin-bottom: 20px; }
+        .nav-card { background: var(--panel); border: 1px solid #333; padding: 10px 20px; cursor: pointer; border-radius: 8px; transition: 0.3s; font-weight: bold; }
+        .nav-card.active { border-color: var(--accent); background: var(--accent); transform: translateY(-3px); }
 
-        /* Liderlik Tablosu */
-        #leaderboard {
-            position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7);
-            padding: 15px; border-radius: 10px; border: 1px solid var(--accent);
-            min-width: 150px; font-family: monospace; pointer-events: none;
-        }
-        #leaderboard h3 { margin: 0 0 10px 0; color: var(--accent); font-size: 1rem; text-align: center; }
-        .lb-entry { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 4px; }
-        .lb-player { color: gold; font-weight: bold; }
+        #stage-wrapper { position: relative; transition: transform 0.2s; }
+        canvas { background: #000; border-radius: 12px; border: 2px solid #222; box-shadow: 0 20px 50px rgba(0,0,0,0.5); cursor: crosshair; }
 
-        .hud-bottom { margin-top: 10px; color: var(--green); font-weight: bold; }
-        .overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); padding: 40px; border: 2px solid var(--accent); text-align: center; border-radius: 20px; display: none; z-index: 100; }
-        .game-btn { background: var(--accent); border: none; color: white; padding: 12px 30px; cursor: pointer; border-radius: 5px; font-weight: bold; margin-top: 10px; }
+        /* Leaderboard & Stats */
+        #leaderboard { position: absolute; top: 15px; right: -160px; background: var(--panel); padding: 15px; border-radius: 10px; border: 1px solid var(--accent); width: 140px; font-family: monospace; }
+        .lb-row { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 5px; }
+
+        .stat-bar { position: absolute; bottom: -40px; left: 0; width: 100%; display: flex; justify-content: space-between; font-weight: bold; color: var(--accent); }
+
+        /* Overlay */
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); border-radius: 12px; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 200; border: 2px solid var(--accent); }
+        .btn-respawn { background: var(--accent); color: white; border: none; padding: 12px 30px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+
+        #start-hint { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; color: white; font-size: 1.5rem; text-shadow: 0 0 10px var(--accent); font-weight: bold; text-align: center; }
+        
+        /* Animations */
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        .pulse { animation: pulse 1.5s infinite; }
     </style>
 </head>
 <body>
 
 <header>
-    <div onclick="location.reload()" style="cursor:pointer; letter-spacing: 2px;"><i class="fas fa-crown"></i> DİJİTAL DÜNYA</div>
-    <div style="color:var(--accent); font-weight:bold;">v1.3.0 PRO</div>
+    <div style="font-weight: bold; letter-spacing: 1px;"><i class="fas fa-project-diagram"></i> DİJİTAL DÜNYA</div>
+    <div class="v-badge">v1.5.0 NEXUS</div>
 </header>
 
 <div class="container">
-    <div id="game-wrapper">
+    <div class="game-nav">
+        <div class="nav-card active" id="nav-snake" onclick="setGame('snake')">SİNEK.IO</div>
+        <div class="nav-card" id="nav-tetris" onclick="setGame('tetris')">TETRIS</div>
+        <div class="nav-card" id="nav-pacman" onclick="setGame('pacman')">PACMAN</div>
+    </div>
+
+    <div id="stage-wrapper">
         <div id="leaderboard">
-            <h3>SIRALAMA</h3>
-            <div id="lb-content"></div>
+            <div style="text-align:center; margin-bottom:10px; color:var(--accent); font-weight:bold;">SIRALAMA</div>
+            <div id="lb-data"></div>
         </div>
-        <canvas id="mainCanvas"></canvas>
+
+        <div id="start-hint" class="pulse">BAŞLAMAK İÇİN TIKLA VEYA HAREKET ET</div>
+
+        <canvas id="gameCanvas"></canvas>
+
         <div id="game-over" class="overlay">
-            <h1 style="color:var(--accent)">ELENDİN!</h1>
-            <p id="death-reason" style="margin-bottom: 20px;"></p>
-            <button class="game-btn" onclick="initGame()">TEKRAR BAŞLA</button>
-            <br>
-            <button class="game-btn" style="background:#444" onclick="location.reload()">MENÜ</button>
+            <h1 style="font-size: 3rem; margin:0;">ELENDİN</h1>
+            <p id="death-reason" style="color:#888"></p>
+            <button class="btn-respawn" onclick="resetStage()">TEKRAR BAŞLA</button>
         </div>
-        <div class="hud-bottom">
-            Mousu Hareket Ettir | Tıkla: Turbo | Dünya: <span id="stat-world">1-1</span>
+
+        <div class="stat-bar">
+            <span>DÜNYA: <span id="stat-w">1</span>-<span id="stat-l">1</span></span>
+            <span>SKOR: <span id="stat-s">0</span></span>
         </div>
     </div>
 </div>
 
 <script>
-    const canvas = document.getElementById("mainCanvas");
+    const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-    const lbContent = document.getElementById("lb-content");
+    let activeGame = 'snake';
+    let loop, isStarted = false, score = 0;
+    let particles = [];
+    let mouse = { x: 450, y: 300, down: false };
+    let keys = {};
 
-    let mouse = { x: 400, y: 300, down: false };
-    let player, ais, foods, gameLoop;
-    let score = 0;
+    // --- Kayıt Verisi ---
+    let userData = JSON.parse(localStorage.getItem('dw_v150')) || {
+        snake: { w:1, l:1 }, tetris: { w:1, l:1 }, pacman: { w:1, l:1 }
+    };
 
-    // Mouse Takibi
-    canvas.addEventListener('mousemove', (e) => {
-        const rect = canvas.getBoundingClientRect();
-        mouse.x = e.clientX - rect.left;
-        mouse.y = e.clientY - rect.top;
+    // --- Kontroller ---
+    canvas.addEventListener('mousemove', e => {
+        const r = canvas.getBoundingClientRect();
+        mouse.x = e.clientX - r.left;
+        mouse.y = e.clientY - r.top;
+        if(!isStarted) startTrigger();
     });
-    window.addEventListener('mousedown', () => mouse.down = true);
+    window.addEventListener('mousedown', () => { mouse.down = true; if(!isStarted) startTrigger(); });
     window.addEventListener('mouseup', () => mouse.down = false);
+    window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if(!isStarted) startTrigger(); });
+    window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 
-    let stats = JSON.parse(localStorage.getItem('dw_v130')) || { w: 1, l: 1 };
+    function startTrigger() {
+        isStarted = true;
+        document.getElementById('start-hint').style.display = 'none';
+        if(activeGame === 'snake') {
+            document.getElementById('leaderboard').style.display = 'block';
+            snakePopulate();
+        }
+    }
 
-    function initGame() {
-        canvas.width = 1000; canvas.height = 650;
-        clearInterval(gameLoop);
+    function setGame(game) {
+        activeGame = game;
+        document.querySelectorAll('.nav-card').forEach(c => c.classList.remove('active'));
+        document.getElementById('nav-'+game).classList.add('active');
+        resetStage();
+    }
+
+    function resetStage() {
+        clearInterval(loop);
+        isStarted = false;
         score = 0;
+        particles = [];
         document.getElementById('game-over').style.display = 'none';
+        document.getElementById('start-hint').style.display = 'block';
+        document.getElementById('leaderboard').style.display = 'none';
+        updateHUD();
 
-        // Oyuncu Başlat
-        player = {
-            name: "SENSİN", segments: [{x: 500, y: 325}], angle: 0, 
-            speed: 3, size: 20, color: '#e94560', alive: true
-        };
-
-        // AI Başlat
-        ais = [];
-        const names = ["Yamyam", "Zehir", "Rüzgar", "Hızlı", "Gölge"];
-        for(let i=0; i<5; i++) ais.push(createAI(names[i]));
-
-        foods = Array.from({length: 80}, () => spawnFood());
-
-        gameLoop = setInterval(update, 1000/60);
+        if(activeGame === 'snake') setupSnake();
+        if(activeGame === 'tetris') setupTetris();
+        if(activeGame === 'pacman') setupPacman();
     }
 
-    function createAI(name) {
-        return {
-            name: name, segments: [{x: Math.random()*1000, y: Math.random()*650}],
-            angle: Math.random()*Math.PI*2, speed: 2.5, 
-            size: 15 + Math.random()*25, 
-            color: `hsl(${Math.random()*360}, 70%, 50%)`, alive: true
-        };
+    // --- PARTİKÜL SİSTEMİ (FX) ---
+    function spawnExplosion(x, y, color) {
+        for(let i=0; i<15; i++) {
+            particles.push({
+                x, y, 
+                vx: (Math.random()-0.5)*10, 
+                vy: (Math.random()-0.5)*10, 
+                life: 1.0, color
+            });
+        }
+        shakeScreen();
     }
 
-    function spawnFood() {
-        return { x: Math.random()*1000, y: Math.random()*650, c: `hsl(${Math.random()*360}, 80%, 60%)` };
+    function shakeScreen() {
+        const wrapper = document.getElementById('stage-wrapper');
+        wrapper.style.transform = `translate(${(Math.random()-0.5)*10}px, ${(Math.random()-0.5)*10}px)`;
+        setTimeout(() => wrapper.style.transform = 'translate(0,0)', 50);
     }
 
-    function update() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // --- 1. SİNEK.IO (SNAKE PRO) ---
+    let player, ais, foods;
+    function setupSnake() {
+        canvas.width = 900; canvas.height = 550;
+        player = { segments: [{x:450, y:275}], angle: 0, size: 20, color: '#e94560', speed: 3 };
+        ais = []; foods = [];
+        loop = setInterval(updateSnake, 1000/60);
+    }
 
-        // OYUNCU HAREKET (Mouse Takibi)
-        let targetAngle = Math.atan2(mouse.y - player.segments[0].y, mouse.x - player.segments[0].x);
-        let diff = targetAngle - player.angle;
-        while (diff < -Math.PI) diff += Math.PI * 2;
-        while (diff > Math.PI) diff -= Math.PI * 2;
-        player.angle += diff * 0.15; // Dönüş hızı
+    function snakePopulate() {
+        for(let i=0; i<70; i++) foods.push({x:Math.random()*900, y:Math.random()*550, c:`hsl(${Math.random()*360}, 100%, 50%)`});
+        const bots = ["ZORT", "Kobra", "Matrix", "Reis", "AI_99"];
+        bots.forEach(b => ais.push({ name:b, segments:[{x:Math.random()*900, y:Math.random()*550}], angle:Math.random()*6, size:15, color:'#555', alive:true }));
+    }
 
-        let currentSpeed = mouse.down ? player.speed * 2 : player.speed;
-        let head = {
-            x: player.segments[0].x + Math.cos(player.angle) * currentSpeed,
-            y: player.segments[0].y + Math.sin(player.angle) * currentSpeed
-        };
+    function updateSnake() {
+        ctx.fillStyle = '#020205'; ctx.fillRect(0,0,900,550);
+        
+        // Grid Arka Plan (Dünyaya göre renk)
+        ctx.strokeStyle = '#111';
+        for(let i=0; i<900; i+=30) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,550); ctx.stroke(); }
 
-        // Duvar Kontrol
-        if(head.x < 0 || head.x > canvas.width || head.y < 0 || head.y > canvas.height) return die("Kenara çarptın!");
+        // Partiküller
+        particles.forEach((p, i) => {
+            p.x += p.vx; p.y += p.vy; p.life -= 0.02;
+            ctx.fillStyle = p.color; ctx.globalAlpha = p.life;
+            ctx.fillRect(p.x, p.y, 3, 3);
+            if(p.life <= 0) particles.splice(i, 1);
+        });
+        ctx.globalAlpha = 1.0;
 
+        if(!isStarted) {
+            ctx.fillStyle = player.color;
+            ctx.beginPath(); ctx.arc(player.segments[0].x, player.segments[0].y, 10, 0, Math.PI*2); ctx.fill();
+            return;
+        }
+
+        // Oyuncu Hareket
+        let target = Math.atan2(mouse.y - player.segments[0].y, mouse.x - player.segments[0].x);
+        let diff = target - player.angle;
+        while(diff < -Math.PI) diff += Math.PI*2;
+        while(diff > Math.PI) diff -= Math.PI*2;
+        player.angle += diff * 0.15;
+        
+        let spd = mouse.down ? player.speed*2 : player.speed;
+        let head = { x: player.segments[0].x + Math.cos(player.angle)*spd, y: player.segments[0].y + Math.sin(player.angle)*spd };
+        
+        if(head.x<0 || head.x>900 || head.y<0 || head.y>550) return die("Kenar çarpması!");
         player.segments.unshift(head);
         if(player.segments.length > player.size) player.segments.pop();
 
-        // AI HAREKET & ZEKA
-        ais.forEach(ai => {
-            if(!ai.alive) return;
-
-            // En yakın yemeği bul
-            let minDist = 1000, targetFood = foods[0];
-            foods.forEach(f => {
-                let d = Math.hypot(ai.segments[0].x - f.x, ai.segments[0].y - f.y);
-                if(d < minDist) { minDist = d; targetFood = f; }
-            });
-
-            let aiTargetAngle = Math.atan2(targetFood.y - ai.segments[0].y, targetFood.x - ai.segments[0].x);
-            
-            // Oyuncudan kaçma/kovalama
-            let dToP = Math.hypot(ai.segments[0].x - player.segments[0].x, ai.segments[0].y - player.segments[0].y);
-            if(dToP < 120) {
-                if(ai.size < player.size) aiTargetAngle += Math.PI; // Kaç
-                else aiTargetAngle = Math.atan2(player.segments[0].y - ai.segments[0].y, player.segments[0].x - ai.segments[0].x); // Saldır
-            }
-
-            let aiDiff = aiTargetAngle - ai.angle;
-            while (aiDiff < -Math.PI) aiDiff += Math.PI * 2;
-            while (aiDiff > Math.PI) aiDiff -= Math.PI * 2;
-            ai.angle += aiDiff * 0.1;
-
-            let aiHead = {
-                x: ai.segments[0].x + Math.cos(ai.angle) * ai.speed,
-                y: ai.segments[0].y + Math.sin(ai.angle) * ai.speed
-            };
-
-            // AI Duvar Sekmesi
-            if(aiHead.x < 10 || aiHead.x > 990) ai.angle = Math.PI - ai.angle;
-            if(aiHead.y < 10 || aiHead.y > 640) ai.angle = -ai.angle;
-
-            ai.segments.unshift(aiHead);
-            if(ai.segments.length > ai.size) ai.segments.pop();
-
-            // Çarpışma: AI Oyuncunun Vücuduna Çarparsa
-            player.segments.forEach((s, i) => {
-                if(i > 8 && Math.hypot(ai.segments[0].x - s.x, ai.segments[0].y - s.y) < 12) {
-                    ai.alive = false; spawnGhostFood(ai.segments);
-                }
-            });
-        });
-
-        // Oyuncu AI'ların Vücuduna Çarparsa
-        ais.forEach(ai => {
-            if(!ai.alive) return;
-            ai.segments.forEach((s, i) => {
-                if(Math.hypot(player.segments[0].x - s.x, player.segments[0].y - s.y) < 12) {
-                    // Kafa kafaya ise boyuta bak
-                    if(i === 0) {
-                        if(player.size > ai.size) { ai.alive = false; score += 100; }
-                        else return die(`${ai.name} seni kafa kafaya yedi!`);
-                    } else return die(`${ai.name} sineğinin vücuduna çarptın!`);
-                }
-            });
-        });
-
-        // Yemek Toplama
+        // AI ve Yemek logic (v1.4'teki geliştirilmiş hal)
         foods.forEach((f, i) => {
-            if(Math.hypot(player.segments[0].x - f.x, player.segments[0].y - f.y) < 15) {
-                player.size += 2; score += 10; foods[i] = spawnFood();
-            }
-            ais.forEach(ai => {
-                if(ai.alive && Math.hypot(ai.segments[0].x - f.x, ai.segments[0].y - f.y) < 15) {
-                    ai.size += 2; foods[i] = spawnFood();
-                }
-            });
-        });
-
-        // ÇİZİM
-        foods.forEach(f => {
             ctx.fillStyle = f.c; ctx.beginPath(); ctx.arc(f.x, f.y, 4, 0, Math.PI*2); ctx.fill();
+            if(Math.hypot(head.x - f.x, head.y - f.y) < 15) {
+                foods[i] = {x:Math.random()*900, y:Math.random()*550, c:f.c};
+                player.size += 2; score += 5; updateHUD();
+            }
         });
 
         ais.forEach(ai => {
             if(!ai.alive) return;
+            ai.angle += (Math.random()-0.5)*0.2;
+            let ah = { x: ai.segments[0].x + Math.cos(ai.angle)*2, y: ai.segments[0].y + Math.sin(ai.angle)*2 };
+            if(ah.x<0||ah.x>900||ah.y<0||ah.y>550) ai.angle += Math.PI;
+            ai.segments.unshift(ah);
+            if(ai.segments.length > ai.size) ai.segments.pop();
+            
             ctx.fillStyle = ai.color;
             ai.segments.forEach(s => { ctx.beginPath(); ctx.arc(s.x, s.y, 7, 0, Math.PI*2); ctx.fill(); });
+
+            if(Math.hypot(head.x - ah.x, head.y - ah.y) < 15) {
+                if(player.size > ai.size) { 
+                    ai.alive = false; spawnExplosion(ah.x, ah.y, ai.color); score += 50; 
+                } else return die("Senden büyük bir AI seni yedi!");
+            }
         });
 
         ctx.fillStyle = player.color;
-        ctx.shadowBlur = mouse.down ? 20 : 0; ctx.shadowColor = player.color;
-        player.segments.forEach((s, i) => {
-            ctx.beginPath(); ctx.arc(s.x, s.y, i===0 ? 11 : 9, 0, Math.PI*2); ctx.fill();
+        player.segments.forEach((s, i) => { ctx.beginPath(); ctx.arc(s.x, s.y, i===0?12:9, 0, Math.PI*2); ctx.fill(); });
+        updateLB();
+    }
+
+    function updateLB() {
+        let list = [{n: "SEN", s: player.size*10}];
+        ais.forEach(a => { if(a.alive) list.push({n:a.name, s:a.size*10}); });
+        list.sort((a,b) => b.s - a.s);
+        document.getElementById('lb-data').innerHTML = list.slice(0,5).map(x => `<div class="lb-row"><span>${x.n}</span><span>${x.s}</span></div>`).join('');
+    }
+
+    // --- 2. TETRIS (HOLD & SHAKING) ---
+    let tBoard, tPiece, tHold = null, tCanHold = true;
+    function setupTetris() {
+        canvas.width = 300; canvas.height = 500;
+        tBoard = Array.from({length: 20}, () => Array(10).fill(0));
+        loop = setInterval(updateTetris, 400);
+    }
+    function updateTetris() {
+        if(!isStarted) return;
+        if(!tPiece) tPiece = tNewPiece();
+        tPiece.y++;
+        if(tCollide()) { 
+            tPiece.y--; tMerge(); tPiece = tNewPiece(); tCanHold = true;
+            if(tCollide()) die("Kule doldu!");
+        }
+        tDraw();
+    }
+    function tNewPiece() {
+        const s = "I J L O S T Z".split(' ');
+        const t = s[Math.floor(Math.random()*s.length)];
+        return { x: 3, y: 0, m: tGetMatrix(t), c: tGetColor(t), type: t };
+    }
+    function tGetMatrix(t) {
+        const m = {
+            'I':[[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]], 'J':[[1,0,0],[1,1,1],[0,0,0]],
+            'L':[[0,0,1],[1,1,1],[0,0,0]], 'O':[[1,1],[1,1]], 'S':[[0,1,1],[1,1,0],[0,0,0]],
+            'T':[[0,1,0],[1,1,1],[0,0,0]], 'Z':[[1,1,0],[0,1,1],[0,0,0]]
+        }; return m[t];
+    }
+    function tGetColor(t) {
+        const c = { 'I':'#0ff','J':'#00f','L':'#f70','O':'#ff0','S':'#0f0','T':'#a0f','Z':'#f00' }; return c[t];
+    }
+    function tCollide() {
+        return tPiece.m.some((r, dy) => r.some((v, dx) => v && (tBoard[tPiece.y+dy] && tBoard[tPiece.y+dy][tPiece.x+dx]) !== 0));
+    }
+    function tMerge() {
+        tPiece.m.forEach((r, dy) => r.forEach((v, dx) => { if(v) tBoard[tPiece.y+dy][tPiece.x+dx] = tPiece.c; }));
+        tBoard.forEach((r, y) => { if(r.every(v => v!==0)) { 
+            tBoard.splice(y, 1); tBoard.unshift(Array(10).fill(0)); 
+            score += 100; updateHUD(); spawnExplosion(150, y*25, '#fff');
+        }});
+    }
+    function tDraw() {
+        ctx.fillStyle='#000'; ctx.fillRect(0,0,300,500);
+        tBoard.forEach((r, y) => r.forEach((v, x) => { if(v) { ctx.fillStyle=v; ctx.fillRect(x*30, y*25, 29, 24); } }));
+        if(tPiece) {
+            ctx.fillStyle = tPiece.c;
+            tPiece.m.forEach((r, dy) => r.forEach((v, dx) => { if(v) ctx.fillRect((tPiece.x+dx)*30, (tPiece.y+dy)*25, 29, 24); }));
+        }
+        ctx.fillStyle='#fff'; ctx.fillText("HOLD: " + (tHold ? tHold.type : "YOK"), 10, 20);
+    }
+    // Tetris Kontrol (Hold Mekaniği)
+    window.addEventListener('keydown', e => {
+        if(activeGame === 'tetris' && isStarted) {
+            if(e.key === 'c' && tCanHold) {
+                let temp = tHold; tHold = { type: tPiece.type };
+                tPiece = temp ? { x:3, y:0, m:tGetMatrix(temp.type), c:tGetColor(temp.type), type:temp.type } : tNewPiece();
+                tCanHold = false;
+            }
+            if(e.key === 'w' || e.key === 'ArrowUp') {
+                const m = tPiece.m[0].map((_, i) => tPiece.m.map(row => row[i]).reverse());
+                const old = tPiece.m; tPiece.m = m; if(tCollide()) tPiece.m = old;
+            }
+            if(e.key === 'a' || e.key === 'ArrowLeft') { tPiece.x--; if(tCollide()) tPiece.x++; }
+            if(e.key === 'd' || e.key === 'ArrowRight') { tPiece.x++; if(tCollide()) tPiece.x--; }
+            if(e.key === 's' || e.key === 'ArrowDown') { tPiece.y++; if(tCollide()) tPiece.y--; }
+            tDraw();
+        }
+    });
+
+    // --- 3. PACMAN (İNTİKAM / POWER PELLET) ---
+    let pMap, pac, pGhosts, pDots, pPower = 0;
+    function setupPacman() {
+        canvas.width = 440; canvas.height = 320;
+        pMap = [[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,2,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,2,1],[1,0,1,1,1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,1,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,1,1,0,1,1,1,0,1,1,0,0,1,1,0,1,1,1,0,1,1,1],[0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0],[1,1,1,0,1,1,1,0,1,1,1,1,1,1,0,1,1,1,0,1,1,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,1,1,1,0,1,1,1,0,1,1,0,1,1,1,0,1,1,1,0,1],[1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]];
+        pac = { x:1, y:1, dx:0, dy:0 };
+        pGhosts = [{x:10,y:5,c:'#f00'},{x:11,y:5,c:'#f0f'},{x:10,y:4,c:'#0ff'},{x:11,y:4,c:'#f90'}].map(g => ({...g, dx:1, dy:0, alive:true}));
+        pDots = [];
+        pMap.forEach((row, y) => row.forEach((v, x) => { if(v===0 || v===2) pDots.push({x,y,v}); }));
+        loop = setInterval(updatePacman, 150);
+    }
+    function updatePacman() {
+        if(!isStarted) { pDraw(); return; }
+        if(pPower > 0) pPower--;
+        
+        // Input ve Hareket (v1.4 benzeri)
+        if(keys['w']) { pac.dx=0; pac.dy=-1; } if(keys['s']) { pac.dx=0; pac.dy=1; }
+        if(keys['a']) { pac.dx=-1; pac.dy=0; } if(keys['d']) { pac.dx=1; pac.dy=0; }
+        if(pMap[pac.y+pac.dy][pac.x+pac.dx] !== 1) { pac.x += pac.dx; pac.y += pac.dy; }
+
+        pDots = pDots.filter(d => {
+            if(d.x === pac.x && d.y === pac.y) {
+                if(d.v === 2) { pPower = 50; score += 50; } // Güç hapı
+                score += 10; updateHUD(); return false;
+            } return true;
         });
-        ctx.shadowBlur = 0;
 
-        // Ölenleri canlandır
-        if(ais.filter(a => a.alive).length < 5) {
-            const names = ["Kurt", "Kartal", "Boğa", "Aslan", "Yılan"];
-            ais.push(createAI(names[Math.floor(Math.random()*5)]));
+        pGhosts.forEach(g => {
+            if(!g.alive) return;
+            if(pMap[g.y+g.dy][g.x+g.dx] === 1) {
+                const ds = [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}];
+                let d = ds[Math.floor(Math.random()*4)]; g.dx=d.x; g.dy=d.y;
+            } else { g.x += g.dx; g.y += g.dy; }
+
+            if(g.x === pacman.x && g.y === pacman.y) {
+                if(pPower > 0) { 
+                    g.alive = false; score += 200; spawnExplosion(g.x*20, g.y*20, '#fff');
+                    setTimeout(() => { g.alive=true; g.x=10; g.y=5; }, 5000);
+                } else die("Hayalet seni yakaladı!");
+            }
+        });
+        pDraw();
+    }
+    function pDraw() {
+        ctx.fillStyle='#000'; ctx.fillRect(0,0,440,320);
+        pMap.forEach((row, y) => row.forEach((v, x) => {
+            if(v===1) { ctx.fillStyle='#111827'; ctx.fillRect(x*20,y*20,20,20); }
+        }));
+        pDots.forEach(d => {
+            ctx.fillStyle = d.v === 2 ? '#fff' : '#ffb8ae';
+            ctx.beginPath(); ctx.arc(d.x*20+10, d.y*20+10, d.v===2?6:2, 0, Math.PI*2); ctx.fill();
+        });
+        pGhosts.forEach(g => {
+            if(!g.alive) return;
+            ctx.fillStyle = pPower > 0 ? '#00f' : g.c;
+            ctx.fillRect(g.x*20+2, g.y*20+2, 16, 16);
+        });
+        ctx.fillStyle = '#ff0'; ctx.beginPath(); ctx.arc(pac.x*20+10, pac.y*20+10, 8, 0, Math.PI*2); ctx.fill();
+    }
+
+    // --- SİSTEM ---
+    function updateHUD() {
+        let cur = userData[activeGame];
+        if(score > cur.l * 500) {
+            cur.l++; if(cur.l > cur.w*10) { cur.w++; cur.l=1; }
+            localStorage.setItem('dw_v150', JSON.stringify(userData));
         }
-
-        updateLeaderboard();
-        checkLevel();
+        document.getElementById('stat-w').innerText = cur.w;
+        document.getElementById('stat-l').innerText = cur.l;
+        document.getElementById('stat-s').innerText = score;
+    }
+    function die(reason) {
+        clearInterval(loop);
+        document.getElementById('death-reason').innerText = reason;
+        document.getElementById('game-over').style.display = 'flex';
+        shakeScreen();
     }
 
-    function spawnGhostFood(segs) {
-        segs.forEach((s, i) => { if(i%3===0) foods.push({x: s.x, y: s.y, c: '#fff'}); });
-    }
-
-    function updateLeaderboard() {
-        let list = [{ name: player.name, score: Math.floor(player.size * 10), isPlayer: true }];
-        ais.forEach(ai => { if(ai.alive) list.push({ name: ai.name, score: Math.floor(ai.size * 10) }); });
-        list.sort((a,b) => b.score - a.score);
-
-        lbContent.innerHTML = list.map((entry, i) => `
-            <div class="lb-entry ${entry.isPlayer ? 'lb-player' : ''}">
-                <span>${i+1}. ${entry.name}</span>
-                <span>${entry.score}</span>
-            </div>
-        `).join('');
-    }
-
-    function checkLevel() {
-        if(score > stats.l * 500) {
-            stats.l++; if(stats.l > stats.w * 10) { stats.w++; stats.l = 1; }
-            localStorage.setItem('dw_v130', JSON.stringify(stats));
-            document.getElementById('stat-world').innerText = `${stats.w}-${stats.l}`;
-        }
-    }
-
-    function die(msg) {
-        clearInterval(gameLoop);
-        document.getElementById('death-reason').innerText = msg;
-        document.getElementById('game-over').style.display = 'block';
-    }
-
-    window.onload = initGame;
+    window.onload = resetStage;
 </script>
 </body>
 </html>
