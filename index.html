@@ -3,275 +3,220 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dijital Dünya v1.7.0 | The Flow</title>
+    <title>Dijital Dünya v1.8.0</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --dark: #05050a; --accent: #e94560; --green: #00ff41; --panel: #16213e; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--dark); color: #fff; overflow: hidden; }
         header { background: var(--panel); padding: 10px 5%; display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent); }
         .container { display: flex; flex-direction: column; align-items: center; padding-top: 20px; }
-        #game-wrapper { position: relative; }
-        canvas { background: #000; border: 2px solid #333; cursor: crosshair; border-radius: 10px; }
-        #leaderboard { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.8); padding: 12px; border-radius: 8px; border: 1px solid var(--accent); min-width: 150px; font-family: monospace; display: none; }
-        .lb-row { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px; }
-        .me { color: gold; font-weight: bold; }
         .game-nav { display: flex; gap: 10px; margin-bottom: 15px; }
-        .nav-btn { background: var(--panel); border: 1px solid #444; color: white; padding: 10px 20px; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        .nav-btn { background: var(--panel); border: 1px solid #333; color: white; padding: 10px 20px; cursor: pointer; border-radius: 5px; font-weight: bold; }
         .nav-btn.active { background: var(--accent); border-color: var(--accent); }
-        .overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.95); padding: 40px; border: 2px solid var(--accent); text-align: center; border-radius: 20px; display: none; z-index: 100; }
-        #pacman-hint { position: absolute; top: 70%; left: 50%; transform: translateX(-50%); color: gold; font-weight: bold; animation: blink 1s infinite; display: none; pointer-events: none; }
-        @keyframes blink { 50% { opacity: 0; } }
+        #wrapper { position: relative; }
+        canvas { background: #000; border: 2px solid #222; border-radius: 10px; cursor: crosshair; }
+        #leaderboard { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.8); padding: 10px; border: 1px solid var(--accent); border-radius: 5px; min-width: 130px; display: none; font-family: monospace; }
+        .lb-row { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 3px; }
+        #hint { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: gold; font-weight: bold; display: none; pointer-events: none; }
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; justify-content: center; align-items: center; border-radius: 10px; }
     </style>
 </head>
 <body>
 
 <header>
-    <div onclick="location.reload()" style="cursor:pointer; letter-spacing: 2px;"><i class="fas fa-microchip"></i> DİJİTAL DÜNYA</div>
-    <div style="color:var(--accent); font-weight: bold;">v1.7.0 PRO</div>
+    <div onclick="location.reload()" style="cursor:pointer; font-weight: bold;">DİJİTAL DÜNYA</div>
+    <div style="color:var(--accent)">v1.8.0 PRO</div>
 </header>
 
 <div class="container">
     <div class="game-nav">
-        <button class="nav-btn active" id="btn-snake" onclick="setGame('snake')">SİNEK.IO</button>
-        <button class="nav-btn" id="btn-tetris" onclick="setGame('tetris')">TETRIS</button>
-        <button class="nav-btn" id="btn-pacman" onclick="setGame('pacman')">PACMAN</button>
+        <button class="nav-btn active" id="btn-snake" onclick="changeGame('snake')">SİNEK.IO</button>
+        <button class="nav-btn" id="btn-tetris" onclick="changeGame('tetris')">TETRIS</button>
+        <button class="nav-btn" id="btn-pacman" onclick="changeGame('pacman')">PACMAN</button>
     </div>
 
-    <div id="game-wrapper">
+    <div id="wrapper">
         <div id="leaderboard">
-            <h3 style="margin:0 0 10px 0; font-size: 0.9rem; text-align: center; color: var(--accent);">SIRALAMA</h3>
+            <div style="text-align:center; color:var(--accent); font-size: 0.8rem; margin-bottom: 5px;">TOP 5</div>
             <div id="lb-list"></div>
         </div>
-        <canvas id="mainCanvas"></canvas>
-        <div id="pacman-hint">HAREKET ET VE BAŞLA!</div>
-
+        <canvas id="gameCanvas"></canvas>
+        <div id="hint">HAREKET ET VE BAŞLA!</div>
         <div id="game-over" class="overlay">
-            <h1 style="color:var(--accent); font-size: 3rem; margin: 0;">ELENDİN!</h1>
-            <p id="death-reason" style="margin: 20px 0; color: #ccc;"></p>
-            <button class="nav-btn" onclick="initStage()">TEKRAR DENE</button>
-            <button class="nav-btn" style="background:#444" onclick="location.reload()">MENÜ</button>
+            <h1 style="color:var(--accent)">ELENDİN!</h1>
+            <button class="nav-btn" onclick="startCurrent()">TEKRAR DENE</button>
         </div>
     </div>
-
+    
     <div style="margin-top: 15px; font-family: monospace; color: var(--green);">
-        DÜNYA: <span id="stat-w">1</span>-<span id="stat-l">1</span> | SKOR: <span id="stat-s" style="color:#fff">0</span>
+        DÜNYA: <span id="stat-w">1</span>-<span id="stat-l">1</span> | SKOR: <span id="stat-s">0</span>
     </div>
 </div>
 
 <script>
-    const canvas = document.getElementById("mainCanvas");
+    const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-    let activeGame = 'snake';
-    let gameLoop, isStarted = false, score = 0;
-    let mouse = { x: 450, y: 300, down: false };
+    let active = 'snake', loop, isRunning = false, score = 0;
+    let mouse = { x: 450, y: 275, down: false };
     let keys = {};
 
-    let stats = JSON.parse(localStorage.getItem('dw_v170')) || { 
+    let stats = JSON.parse(localStorage.getItem('dw_v180')) || { 
         snake: {w:1, l:1}, tetris: {w:1, l:1}, pacman: {w:1, l:1} 
     };
 
     // Kontroller
     canvas.addEventListener('mousemove', e => {
         const r = canvas.getBoundingClientRect();
-        mouse.x = e.clientX - r.left;
-        mouse.y = e.clientY - r.top;
-        if(activeGame === 'pacman' && !isStarted) triggerPacman();
+        mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
+        if(active === 'pacman' && !isRunning) isRunning = true;
     });
     window.addEventListener('mousedown', () => mouse.down = true);
     window.addEventListener('mouseup', () => mouse.down = false);
     window.addEventListener('keydown', e => { 
         keys[e.key.toLowerCase()] = true; 
-        if(activeGame === 'pacman' && !isStarted) triggerPacman();
+        if(active === 'pacman' && !isRunning) isRunning = true;
     });
     window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 
-    function triggerPacman() {
-        isStarted = true;
-        document.getElementById('pacman-hint').style.display = 'none';
-    }
-
-    function setGame(game) {
-        activeGame = game;
+    function changeGame(g) {
+        active = g;
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('btn-' + game).classList.add('active');
-        initStage();
+        document.getElementById('btn-'+g).classList.add('active');
+        startCurrent();
     }
 
-    function initStage() {
-        clearInterval(gameLoop);
+    function startCurrent() {
+        clearInterval(loop);
         score = 0;
         document.getElementById('game-over').style.display = 'none';
-        document.getElementById('pacman-hint').style.display = (activeGame === 'pacman') ? 'block' : 'none';
-        document.getElementById('leaderboard').style.display = (activeGame === 'snake') ? 'block' : 'none';
+        document.getElementById('leaderboard').style.display = (active === 'snake') ? 'block' : 'none';
+        document.getElementById('hint').style.display = (active === 'pacman') ? 'block' : 'none';
         
-        // Sinek ve Tetris direkt başlar, Pacman beklemede kalır
-        isStarted = (activeGame !== 'pacman'); 
-        
+        // Sinek ve Tetris hemen akar, Pacman beklemede başlar
+        isRunning = (active !== 'pacman');
+
+        if(active === 'snake') initSnake();
+        if(active === 'tetris') initTetris();
+        if(active === 'pacman') initPacman();
         updateHUD();
-
-        if(activeGame === 'snake') setupSnake();
-        if(activeGame === 'tetris') setupTetris();
-        if(activeGame === 'pacman') setupPacman();
     }
 
-    // --- 1. SİNEK.IO (SNAKE.IO) ---
-    let player, ais, foods;
-    function setupSnake() {
+    // --- 1. SİNEK.IO (DOĞRU ÇARPIŞMA SİSTEMİ) ---
+    let player, bots, foods;
+    function initSnake() {
         canvas.width = 900; canvas.height = 550;
-        player = { segments: [{x: 450, y: 275}], angle: 0, speed: 3, size: 25, color: '#e94560', alive: true };
-        ais = []; foods = [];
-        for(let i=0; i<60; i++) foods.push(newFood());
-        ["Zehir", "Kobra", "Alfa", "Gölge", "Ejder"].forEach(n => ais.push(createAI(n)));
-        gameLoop = setInterval(updateSnake, 1000/60);
+        player = { segments: [{x:450,y:275}], angle:0, size:25, speed:3, color:'#e94560' };
+        foods = Array.from({length:60}, () => spawnFood());
+        bots = ["Kobra","Zehir","Alfa","Reis","Gölge"].map(n => createBot(n));
+        loop = setInterval(updateSnake, 1000/60);
     }
-
-    function newFood(x, y, color) {
-        return { x: x || Math.random()*900, y: y || Math.random()*550, c: color || `hsl(${Math.random()*360}, 80%, 50%)`, v: color ? 5 : 1 };
-    }
-
-    function createAI(name) {
-        return { name, segments: [{x: Math.random()*900, y: Math.random()*550}], angle: Math.random()*6, speed: 2.5, size: 20+Math.random()*20, color: `hsl(${Math.random()*360}, 60%, 50%)`, alive: true };
-    }
+    function spawnFood(x,y,c) { return {x:x||Math.random()*900, y:y||Math.random()*550, c:c||`hsl(${Math.random()*360},80%,50%)`, v:c?5:1}; }
+    function createBot(n) { return { name:n, segments:[{x:Math.random()*900,y:Math.random()*550}], angle:Math.random()*6, size:20, speed:2.5, color:'#555', alive:true }; }
 
     function updateSnake() {
         ctx.fillStyle = '#05050a'; ctx.fillRect(0,0,900,550);
-        ctx.strokeStyle = '#111';
-        for(let i=0; i<900; i+=30) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,550); ctx.stroke(); }
-
-        // OYUNCU HAREKET
-        let targetAngle = Math.atan2(mouse.y - player.segments[0].y, mouse.x - player.segments[0].x);
-        let diff = targetAngle - player.angle;
-        while(diff < -Math.PI) diff += Math.PI*2;
-        while(diff > Math.PI) diff -= Math.PI*2;
-        player.angle += diff * 0.15;
-
-        let curSpd = mouse.down ? player.speed * 1.8 : player.speed;
-        let head = { x: player.segments[0].x + Math.cos(player.angle)*curSpd, y: player.segments[0].y + Math.sin(player.angle)*curSpd };
         
-        if(head.x<0 || head.x>900 || head.y<0 || head.y>550) return die("Kenara çarptın!");
+        // Oyuncu Hareket
+        let target = Math.atan2(mouse.y - player.segments[0].y, mouse.x - player.segments[0].x);
+        let diff = target - player.angle;
+        while(diff < -Math.PI) diff += Math.PI*2; while(diff > Math.PI) diff -= Math.PI*2;
+        player.angle += diff * 0.15;
+        let s = mouse.down ? player.speed*1.8 : player.speed;
+        let head = { x: player.segments[0].x + Math.cos(player.angle)*s, y: player.segments[0].y + Math.sin(player.angle)*s };
+        
+        if(head.x<0||head.x>900||head.y<0||head.y>550) return die();
         player.segments.unshift(head);
         if(player.segments.length > player.size) player.segments.pop();
 
-        // --- GELİŞMİŞ ÇARPIŞMA SİSTEMİ (Snake.io) ---
-        const allSnakes = [player, ...ais.filter(a => a.alive)];
-        allSnakes.forEach(snakeA => {
-            const headA = snakeA.segments[0];
-            allSnakes.forEach(snakeB => {
-                if (snakeA === snakeB) return; // Kendi gövden kural dışı (Ölümsüzsün)
-
-                snakeB.segments.forEach((segB, idxB) => {
-                    let dist = Math.hypot(headA.x - segB.x, headA.y - segB.y);
-                    if(dist < 12) {
-                        if(idxB === 0) { // Kafa kafaya
-                            if(snakeA.size > snakeB.size) killSnake(snakeB);
-                            else if(snakeA === player) die(snakeB.name + " seni yuttu!");
-                        } else { // Yan tarafa/gövdeye çarpma
-                            if(snakeA === player) die(snakeB.name + " sineğinin yanına çarptın!");
-                            else killSnake(snakeA);
+        // ÇARPIŞMA SİSTEMİ (OE DEDİĞİN GİBİ)
+        const all = [player, ...bots.filter(b=>b.alive)];
+        all.forEach(snA => {
+            const hA = snA.segments[0];
+            all.forEach(snB => {
+                if(snA === snB) return; // Kendi yanına çarparsa BİR ŞEY OLMAZ
+                
+                snB.segments.forEach((segB, idx) => {
+                    if(Math.hypot(hA.x-segB.x, hA.y-segB.y) < 12) {
+                        if(idx === 0) { // Kafa kafaya
+                            if(snA.size > snB.size) killBot(snB); else if(snA === player) die();
+                        } else { // Başkasının yanına çarpma
+                            if(snA === player) die(); else killBot(snA);
                         }
                     }
                 });
             });
         });
 
-        // AI & YEMEK
-        ais.forEach(ai => {
-            if(!ai.alive) return;
-            ai.angle += (Math.random()-0.5)*0.2;
-            let ah = { x: ai.segments[0].x + Math.cos(ai.angle)*ai.speed, y: ai.segments[0].y + Math.sin(ai.angle)*ai.speed };
-            if(ah.x<10 || ah.x>890 || ah.y<10 || ah.y>540) ai.angle += Math.PI;
-            ai.segments.unshift(ah);
-            if(ai.segments.length > ai.size) ai.segments.pop();
-            drawSnake(ai);
+        // Botlar ve Yemek
+        bots.forEach(b => {
+            if(!b.alive) return;
+            b.angle += (Math.random()-0.5)*0.2;
+            let bh = { x: b.segments[0].x + Math.cos(b.angle)*b.speed, y: b.segments[0].y + Math.sin(b.angle)*b.speed };
+            if(bh.x<10||bh.x>890||bh.y<10||bh.y>540) b.angle += Math.PI;
+            b.segments.unshift(bh); if(b.segments.length > b.size) b.segments.pop();
+            ctx.fillStyle = b.color; b.segments.forEach(seg => { ctx.beginPath(); ctx.arc(seg.x,seg.y,7,0,Math.PI*2); ctx.fill(); });
         });
 
-        foods.forEach((f, i) => {
-            ctx.fillStyle = f.c; ctx.beginPath(); ctx.arc(f.x, f.y, f.v===1?4:6, 0, Math.PI*2); ctx.fill();
-            if(Math.hypot(player.segments[0].x - f.x, player.segments[0].y - f.y) < 15) {
-                player.size += f.v; score += f.v*5; foods.splice(i, 1); updateHUD();
-            }
+        foods.forEach((f,i) => {
+            ctx.fillStyle=f.c; ctx.beginPath(); ctx.arc(f.x,f.y,f.v===1?4:6,0,Math.PI*2); ctx.fill();
+            if(Math.hypot(player.segments[0].x-f.x, player.segments[0].y-f.y)<15) { player.size+=f.v; score+=f.v*10; foods.splice(i,1); updateHUD(); }
         });
+        if(foods.length<60) foods.push(spawnFood());
+        if(bots.filter(b=>b.alive).length<5) bots.push(createBot("Rakip"));
 
-        if(foods.length < 60) foods.push(newFood());
-        if(ais.filter(a => a.alive).length < 5) ais.push(createAI("Yeni Rakip"));
-        drawSnake(player);
+        ctx.fillStyle=player.color; player.segments.forEach((seg,i)=>{ ctx.beginPath(); ctx.arc(seg.x,seg.y,i===0?11:8,0,Math.PI*2); ctx.fill(); });
         updateLB();
     }
-
-    function killSnake(s) { s.alive = false; s.segments.forEach((seg, i) => { if(i%3===0) foods.push(newFood(seg.x, seg.y, s.color)); }); }
-    function drawSnake(s) {
-        ctx.fillStyle = s.color;
-        s.segments.forEach((seg, i) => { ctx.beginPath(); ctx.arc(seg.x, seg.y, i===0?11:8, 0, Math.PI*2); ctx.fill(); });
-    }
+    function killBot(b) { b.alive=false; b.segments.forEach((s,i)=>{ if(i%3===0) foods.push(spawnFood(s.x,s.y,b.color)); }); }
     function updateLB() {
-        let list = [{n: "SEN", s: player.size*10, me: true}];
-        ais.forEach(a => { if(a.alive) list.push({n: a.name, s: a.size*10}); });
-        list.sort((a,b) => b.s - a.s);
-        document.getElementById('lb-list').innerHTML = list.slice(0,5).map(x => `<div class="lb-row ${x.me?'me':''}"><span>${x.n}</span><span>${Math.floor(x.s)}</span></div>`).join('');
+        let l = [{n:"SEN", s:player.size*10, me:true}]; bots.forEach(b=>{ if(b.alive) l.push({n:b.name, s:b.size*10}); });
+        l.sort((a,b)=>b.s-a.s);
+        document.getElementById('lb-list').innerHTML = l.slice(0,5).map(x=>`<div class="lb-row ${x.me?'me':''}"><span>${x.n}</span><span>${Math.floor(x.s)}</span></div>`).join('');
     }
 
-    // --- 2. TETRIS PRO (7-BLOK) ---
-    let tBoard, tPiece;
-    const tShapes = {
-        'I':[[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]], 'J':[[1,0,0],[1,1,1],[0,0,0]], 'L':[[0,0,1],[1,1,1],[0,0,0]],
-        'O':[[1,1],[1,1]], 'S':[[0,1,1],[1,1,0],[0,0,0]], 'T':[[0,1,0],[1,1,1],[0,0,0]], 'Z':[[1,1,0],[0,1,1],[0,0,0]]
-    };
-    function setupTetris() {
+    // --- 2. TETRIS (MODERN 7-BLOK) ---
+    let tB, tP;
+    const tS = {'I':[[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],'J':[[1,0,0],[1,1,1],[0,0,0]],'L':[[0,0,1],[1,1,1],[0,0,0]],'O':[[1,1],[1,1]],'S':[[0,1,1],[1,1,0],[0,0,0]],'T':[[0,1,0],[1,1,1],[0,0,0]],'Z':[[1,1,0],[0,1,1],[0,0,0]]};
+    function initTetris() {
         canvas.width = 300; canvas.height = 500;
-        tBoard = Array.from({length: 20}, () => Array(10).fill(0));
-        tPiece = newTPiece();
-        gameLoop = setInterval(updateTetris, 450);
+        tB = Array.from({length:20},()=>Array(10).fill(0));
+        tP = newTP();
+        loop = setInterval(()=>{ tP.y++; if(tC()){ tP.y--; tM(); tP=newTP(); if(tC()) die(); } drawT(); }, 450);
     }
-    function updateTetris() {
-        tPiece.y++;
-        if(tCollide()) { tPiece.y--; tMerge(); tPiece = newTPiece(); if(tCollide()) die("Kule doldu!"); }
-        drawTetris();
-    }
-    function newTPiece() { const keys = Object.keys(tShapes); const t = keys[Math.floor(Math.random()*keys.length)]; return { x: 3, y: 0, m: tShapes[t], c: `hsl(${Math.random()*360}, 80%, 60%)` }; }
-    function tCollide() { return tPiece.m.some((row, dy) => row.some((v, dx) => v && (tBoard[tPiece.y+dy] && tBoard[tPiece.y+dy][tPiece.x+dx]) !== 0)); }
-    function tMerge() {
-        tPiece.m.forEach((row, dy) => row.forEach((v, dx) => { if(v) tBoard[tPiece.y+dy][tPiece.x+dx] = tPiece.c; }));
-        tBoard.forEach((row, y) => { if(row.every(v => v!==0)) { tBoard.splice(y,1); tBoard.unshift(Array(10).fill(0)); score+=100; updateHUD(); } });
-    }
-    function drawTetris() {
-        ctx.fillStyle='#000'; ctx.fillRect(0,0,300,500);
-        tBoard.forEach((row, y) => row.forEach((v, x) => { if(v) { ctx.fillStyle=v; ctx.fillRect(x*30, y*25, 29, 24); } }));
-        ctx.fillStyle = tPiece.c;
-        tPiece.m.forEach((row, dy) => row.forEach((v, dx) => { if(v) ctx.fillRect((tPiece.x+dx)*30, (tPiece.y+dy)*25, 29, 24); }));
-    }
-    window.addEventListener('keydown', e => {
-        if(activeGame !== 'tetris') return;
-        if(e.key === 'w' || e.key === 'ArrowUp') { const old = tPiece.m; tPiece.m = tPiece.m[0].map((_, i) => tPiece.m.map(row => row[i]).reverse()); if(tCollide()) tPiece.m = old; }
-        if(e.key === 'a' || e.key === 'ArrowLeft') { tPiece.x--; if(tCollide()) tPiece.x++; }
-        if(e.key === 'd' || e.key === 'ArrowRight') { tPiece.x++; if(tCollide()) tPiece.x--; }
-        if(e.key === 's' || e.key === 'ArrowDown') { tPiece.y++; if(tCollide()) tPiece.y--; }
-        drawTetris();
+    function newTP() { const k=Object.keys(tS); const t=k[Math.floor(Math.random()*k.length)]; return {x:3,y:0,m:tS[t],c:`hsl(${Math.random()*360},80%,60%)`}; }
+    function tC() { return tP.m.some((r,dy)=>r.some((v,dx)=>v&&(tB[tP.y+dy]&&tB[tP.y+dy][tP.x+dx])!==0)); }
+    function tM() { tP.m.forEach((r,dy)=>r.forEach((v,dx)=>{if(v)tB[tP.y+dy][tP.x+dx]=tP.c;})); tB.forEach((r,y)=>{if(r.every(v=>v!==0)){tB.splice(y,1);tB.unshift(Array(10).fill(0));score+=100;updateHUD();}}); }
+    function drawT() { ctx.fillStyle='#000'; ctx.fillRect(0,0,300,500); tB.forEach((r,y)=>r.forEach((v,x)=>{if(v){ctx.fillStyle=v;ctx.fillRect(x*30,y*25,29,24);}})); ctx.fillStyle=tP.c; tP.m.forEach((r,dy)=>r.forEach((v,dx)=>{if(v)ctx.fillRect((tP.x+dx)*30,(tP.y+dy)*25,29,24);})); }
+    window.addEventListener('keydown', e=>{
+        if(active!=='tetris') return;
+        if(e.key==='w'||e.key==='ArrowUp'){ const old=tP.m; tP.m=tP.m[0].map((_,i)=>tP.m.map(row=>row[i]).reverse()); if(tC()) tP.m=old; }
+        if(e.key==='a'||e.key==='ArrowLeft'){ tP.x--; if(tC()) tP.x++; }
+        if(e.key==='d'||e.key==='ArrowRight'){ tP.x++; if(tC()) tP.x--; }
+        if(e.key==='s'||e.key==='ArrowDown'){ tP.y++; if(tC()) tP.y--; }
+        drawT();
     });
 
     // --- 3. PACMAN (GRID SİSTEMİ) ---
-    let pMap, pac, ghosts, pDots;
-    function setupPacman() {
+    let pM, pac, pG, pD;
+    function initPacman() {
         canvas.width = 440; canvas.height = 300;
-        pMap = [[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1],[1,0,1,1,1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,1,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,1,1,0,1,1,1,0,1,1,0,0,1,1,0,1,1,1,0,1,1,1],[0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0],[1,1,1,0,1,1,1,0,1,1,1,1,1,1,0,1,1,1,0,1,1,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,1,1,1,0,1,1,1,0,1,1,1,1,1,1,0,1,1,1,0,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]];
-        pac = { x:1, y:1, dx:0, dy:0 };
-        ghosts = [{x:10, y:5, c:'#f00'},{x:11, y:5, c:'#f0f'},{x:10, y:4, c:'#0ff'},{x:11, y:4, c:'#f90'}].map(g => ({...g, dx:1, dy:0}));
-        pDots = [];
-        pMap.forEach((row, y) => row.forEach((v, x) => { if(v===0) pDots.push({x,y}); }));
-        gameLoop = setInterval(updatePacman, 150);
+        pM = [[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1],[1,0,1,1,1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,1,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,1,1,0,1,1,1,0,1,1,0,0,1,1,0,1,1,1,0,1,1,1],[0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0],[1,1,1,0,1,1,1,0,1,1,1,1,1,1,0,1,1,1,0,1,1,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,1,1,1,0,1,1,1,0,1,1,1,1,1,1,0,1,1,1,0,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]];
+        pac = {x:1,y:1,dx:0,dy:0}; pG = [{x:10,y:5,c:'#f00'},{x:11,y:5,c:'#f0f'}].map(g=>({...g,dx:1,dy:0}));
+        pD = []; pM.forEach((r,y)=>r.forEach((v,x)=>{if(v===0)pD.push({x,y});}));
+        loop = setInterval(()=>{
+            if(!isRunning) { drawP(); return; }
+            document.getElementById('hint').style.display='none';
+            if(keys['w']){pac.dx=0;pac.dy=-1;} if(keys['s']){pac.dx=0;pac.dy=1;} if(keys['a']){pac.dx=-1;pac.dy=0;} if(keys['d']){pac.dx=1;pac.dy=0;}
+            if(pM[pac.y+pac.dy][pac.x+pac.dx]===0){pac.x+=pac.dx;pac.y+=pac.dy;}
+            pG.forEach(g=>{ if(pM[g.y+g.dy][g.x+g.dx]!==0){const ds=[{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}];let d=ds[Math.floor(Math.random()*4)];g.dx=d.x;g.dy=d.y;}else{g.x+=g.dx;g.y+=g.dy;} if(g.x===pac.x&&g.y===pac.y) die(); });
+            pD=pD.filter(d=>{if(d.x===pac.x&&d.y===pac.y){score+=10;updateHUD();return false;}return true;}); drawP();
+        }, 150);
     }
-    function updatePacman() {
-        if(!isStarted) { drawP(); return; }
-        if(keys['w']) { pac.dx=0; pac.dy=-1; } if(keys['s']) { pac.dx=0; pac.dy=1; }
-        if(keys['a']) { pac.dx=-1; pac.dy=0; } if(keys['d']) { pac.dx=1; pac.dy=0; }
-        if(pMap[pac.y+pac.dy][pac.x+pac.dx] === 0) { pac.x += pac.dx; pac.y += pac.dy; }
-        ghosts.forEach(g => {
-            if(pMap[g.y+g.dy][g.x+g.dx] !== 0) { const ds = [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}]; let d = ds[Math.floor(Math.random()*4)]; g.dx=d.x; g.dy=d.y; } else { g.x+=g.dx; g.y+=g.dy; }
-            if(g.x===pac.x && g.y===pac.y) die("Hayalet yakaladı!");
-        });
-        pDots = pDots.filter(d => { if(d.x===pac.x && d.y===pac.y) { score+=10; updateHUD(); return false; } return true; });
-        drawP();
-    }
-    function drawP() {
-        ctx.fillStyle='#000'; ctx.fillRect(0,0,440,300);
-        pMap.forEach((row, y) => row.forEach((v, x) => { if(v===1) { ctx.fillStyle='#111827'; ctx.fillRect(x*20,y*20,20,20); } }));
-        ctx.fillStyle='#ff0'; ctx.beginPath(); ctx.arc(pac.x*20+10, pac.y*20+10,
+    function drawP() { ctx.fillStyle='#000'; ctx.fillRect(0,0,440,300); pM.forEach((r,y)=>r.forEach((v,x)=>{if(v===1){ctx.fillStyle='#111827';ctx.fillRect(x*20,y*20,20,20);}})); ctx.fillStyle='#ff0'; ctx.beginPath(); ctx.arc(pac.x*20+10,pac.y*20+10,8,0,Math.PI*2); ctx.fill(); pG.forEach(g=>{ctx.fillStyle=g.c;ctx.fillRect(g.x*20+2,g.y*20+2,16,16);}); ctx.fillStyle='#fff'; pD.forEach(d=>ctx.fillRect(d.x*20+9,d.y*20+9,2,2)); }
+
+    function updateHUD() { let cur=stats[active]; if(score>cur.l*500){cur.l++; if(cur.l>cur.w*10){cur.w++;cur.l=1;} localStorage.setItem('dw_v180', JSON.stringify(stats)); } document.getElementById('stat-w').innerText=cur.w; document.getElementById('stat-l').innerText=cur.l; document.getElementById('stat-s').innerText=score; }
+    function die() { clearInterval(loop); document.getElementById('game-over').style.display='flex'; }
+    window.onload = startCurrent;
+</script>
+</body>
+</html>
