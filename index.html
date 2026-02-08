@@ -3,175 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benim Dünyam | Oyunlar & Notlar v1.0.4</title>
+    <title>Benim Dünyam | v1.0.5</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --dark: #1a1a2e; --blue: #0f3460; --accent: #e94560; --text: #e2e2e2; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #16213e; color: var(--text); }
+        :root { --dark: #0d0d1a; --blue: #1a1a40; --accent: #e94560; --green: #00ff41; --text: #e2e2e2; }
+        body { font-family: 'Consolas', monospace; margin: 0; background-color: var(--dark); color: var(--text); overflow: hidden; }
         
-        header { background: var(--dark); color: white; padding: 10px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); }
-        .nav-left { cursor: pointer; font-weight: bold; font-size: 1.2rem; }
-        .nav-right { display: flex; align-items: center; gap: 10px; }
+        /* Üst Panel */
+        header { background: #16213e; padding: 10px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); }
+        .version-group { display: flex; align-items: center; background: var(--accent); padding: 2px 10px; border-radius: 15px; gap: 5px; cursor: pointer; }
+
+        /* Ana Konteyner */
+        .container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90vh; }
+
+        /* OYUN ANA MENÜ (3 Butonlu Yapı) */
+        .game-main-menu { display: flex; justify-content: center; align-items: center; gap: 30px; }
+        .menu-btn { 
+            width: 180px; height: 180px; background: var(--blue); border: 2px solid var(--accent); 
+            border-radius: 20px; display: flex; flex-direction: column; justify-content: center; 
+            align-items: center; cursor: pointer; transition: 0.3s; font-weight: bold;
+        }
+        .menu-btn:hover { transform: scale(1.1); box-shadow: 0 0 20px var(--accent); }
+        .menu-btn i { font-size: 3rem; margin-bottom: 10px; }
+
+        /* Oyun Sahnesi */
+        #game-canvas-container { position: relative; display: none; flex-direction: column; align-items: center; }
+        canvas { border: 5px solid #333; background: #000; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
         
-        /* Versiyon ve Bilgi Butonu */
-        .version-group { display: flex; align-items: center; background: var(--accent); border-radius: 20px; padding: 3px 10px; gap: 5px; }
-        .version { font-size: 12px; font-weight: bold; }
-        .info-btn { cursor: pointer; font-size: 14px; color: white; border: none; background: none; }
+        /* HUD (Oyun içi bilgiler) */
+        .hud { display: flex; justify-content: space-between; width: 400px; margin-bottom: 10px; color: var(--green); font-size: 1.2rem; }
 
-        .btn-logs { background: var(--blue); color: white; border: 1px solid var(--accent); padding: 8px 15px; border-radius: 5px; cursor: pointer; }
-
-        .container { max-width: 900px; margin: 30px auto; text-align: center; padding: 20px; }
-        .welcome-box { background: var(--dark); padding: 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 30px; }
-        
-        .middle-menu { display: flex; justify-content: center; gap: 20px; margin-top: 30px; }
-        .menu-card { background: var(--blue); color: white; padding: 25px; border-radius: 15px; cursor: pointer; transition: 0.3s; flex: 1; }
-        .menu-card:hover { transform: scale(1.05); border: 1px solid var(--accent); }
-
-        /* Oyunlar */
-        .game-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 30px; }
-        .game-item { background: var(--dark); padding: 15px; border-radius: 10px; cursor: pointer; border: 1px solid #444; }
-        .game-item i { font-size: 2.5rem; margin-bottom: 10px; display: block; }
-
-        /* Not Defteri (Günlükler) */
-        #diary-area { background: var(--dark); padding: 20px; border-radius: 15px; border: 1px solid var(--accent); }
-        textarea { width: 90%; height: 150px; background: #0f3460; color: white; border: 1px solid #444; padding: 10px; border-radius: 5px; margin-bottom: 10px; }
-        .log-list { text-align: left; margin-top: 20px; max-height: 300px; overflow-y: auto; }
-        .log-entry { background: #1f1f3d; padding: 10px; margin-bottom: 5px; border-left: 3px solid var(--accent); border-radius: 5px; }
-
-        /* Modal (Sürüm Bilgisi İçin) */
-        #version-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--dark); padding: 20px; border: 2px solid var(--accent); border-radius: 10px; z-index: 1000; width: 300px; }
-        .modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index: 999; }
-
-        #game-stage { background: #000; margin: 20px auto; display: none; border: 3px solid var(--accent); width: 400px; height: 400px; }
         .hidden { display: none; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="nav-left" onclick="showHome()"><i class="fas fa-terminal"></i> Benim Dünyam</div>
+    <div onclick="location.reload()" style="cursor:pointer;"><i class="fas fa-dragon"></i> BENİM DÜNYAM</div>
     <div class="nav-right">
-        <div class="version-group">
-            <span class="version">v1.0.4</span>
-            <button class="info-btn" onclick="toggleModal()"><i class="fas fa-info-circle"></i></button>
+        <div class="version-group" onclick="alert('v1.0.5: Oyun ana menüsü, Yılan Level Sistemi, Duvar Ölümü, Shift Hızı ve Veri Kaydetme eklendi.')">
+            <span class="version">v1.0.5</span> <i class="fas fa-info-circle"></i>
         </div>
-        <button class="btn-logs" onclick="showSection('diary-area')">Günlükler</button>
     </div>
 </header>
 
 <div class="container">
-    <div id="home-content">
-        <div class="welcome-box">
-            <h1 style="color: var(--accent);">Hoş Geldin! 🚀</h1>
-            <p>Burası benim dijital dünyam. Sağ üstten günlük tutabilir veya oyun oynayabilirsin.</p>
-            <h3>Hakkımda</h3>
-            <p>Sürekli gelişen ve güncellenen bir platform projesi.</p>
+    <div id="main-menu" class="game-main-menu">
+        <div class="menu-btn" onclick="openSettings()">
+            <i class="fas fa-cog"></i><span>AYARLAR</span>
         </div>
-        <div class="middle-menu">
-            <div class="menu-card" onclick="showSection('games-section')"><i class="fas fa-gamepad"></i><br>Oyunlar</div>
-            <div class="menu-card" onclick="showSection('notes')"><i class="fas fa-book-open"></i><br>Ders Notları</div>
-            <div class="menu-card" onclick="showSection('movies')"><i class="fas fa-film"></i><br>Filmler</div>
+        <div class="menu-btn" onclick="startSnakeGame()" style="background: var(--accent);">
+            <i class="fas fa-play"></i><span>OYNA</span>
+        </div>
+        <div class="menu-btn" onclick="openSkins()">
+            <i class="fas fa-user-ninja"></i><span>KARAKTER</span>
         </div>
     </div>
 
-    <div id="diary-area" class="hidden">
-        <button onclick="showHome()">Geri</button>
-        <h2>Günlük Notlarım</h2>
-        <textarea id="diaryInput" placeholder="Bugün neler yaptın?"></textarea><br>
-        <button class="btn-logs" onclick="saveLog()">Notu Ekle</button>
-        <div class="log-list" id="logList">
-            <div class="log-entry"><strong>08.02.2026:</strong> Sisteme giriş yapıldı.</div>
+    <div id="game-canvas-container">
+        <div class="hud">
+            <span id="stat-level">Dünya: 1-1</span>
+            <span id="stat-score">Puan: 0</span>
         </div>
+        <canvas id="snakeCanvas" width="400" height="400"></canvas>
+        <p style="color: #666; margin-top: 10px;">Yön: Ok Tuşları | Hız: Left Shift</p>
     </div>
-
-    <div id="games-section" class="hidden">
-        <button onclick="showHome()">Geri</button>
-        <h2>Oyunlar</h2>
-        <div class="game-options">
-            <div class="game-item" onclick="startSnake()"><i class="fas fa-snake">🐍</i><p>Yılan</p></div>
-            <div class="game-item" onclick="alert('Tetris Yakında!')"><i class="fas fa-cube" style="color:#9b59b6"></i><p>Tetris</p></div>
-            <div class="game-item" onclick="alert('Pacman Yakında!')"><i class="fas fa-ghost" style="color:#f1c40f"></i><p>Pacman</p></div>
-        </div>
-        <div id="game-stage"><canvas id="gc" width="400" height="400"></canvas></div>
-    </div>
-
-    <div id="notes" class="hidden"><h2>Ders Notları</h2><button onclick="showHome()">Geri</button></div>
-    <div id="movies" class="hidden"><h2>Filmler</h2><button onclick="showHome()">Geri</button></div>
 </div>
 
-<div class="modal-overlay" id="overlay" onclick="toggleModal()"></div>
-<div id="version-modal">
-    <h3 style="color:var(--accent)">Sürüm Geçmişi</h3>
-    <hr>
-    <p><strong>v1.0.4:</strong> Günlük sistemi not defterine çevrildi, sürüm bilgisi "i" butonuna taşındı. Yılan ikonu eklendi.</p>
-    <p><strong>v1.0.3:</strong> Tasarım koyu temaya geçti.</p>
-    <button onclick="toggleModal()">Kapat</button>
+<div id="game-over" class="overlay">
+    <h1 style="color: var(--accent); font-size: 3rem;">ÖLDÜN!</h1>
+    <p id="final-stats"></p>
+    <button class="menu-btn" style="height: 60px; width: 200px;" onclick="location.reload()">TEKRAR DENE</button>
 </div>
 
 <script>
-    function toggleModal() {
-        let m = document.getElementById('version-modal');
-        let o = document.getElementById('overlay');
-        let isVis = m.style.display === 'block';
-        m.style.display = isVis ? 'none' : 'block';
-        o.style.display = isVis ? 'none' : 'block';
+    // VERİ KAYDETME SİSTEMİ
+    let userData = JSON.parse(localStorage.getItem('myWorldData')) || {
+        level: 1,
+        world: 1,
+        totalPoints: 0,
+        settings: { volume: 50, difficulty: 'normal' },
+        skin: 'default'
+    };
+
+    function saveData() {
+        localStorage.setItem('myWorldData', JSON.stringify(userData));
     }
 
-    function saveLog() {
-        let input = document.getElementById('diaryInput');
-        if(!input.value) return;
-        let date = new Date().toLocaleDateString();
-        let div = document.createElement('div');
-        div.className = 'log-entry';
-        div.innerHTML = `<strong>${date}:</strong> ${input.value}`;
-        document.getElementById('logList').prepend(div);
-        input.value = "";
-    }
+    // YILAN OYUNU DEĞİŞKENLERİ
+    const canvas = document.getElementById("snakeCanvas");
+    const ctx = canvas.getContext("2d");
+    let box = 20;
+    let snake = [{ x: 10 * box, y: 10 * box }];
+    let food = { x: Math.floor(Math.random() * 19 + 1) * box, y: Math.floor(Math.random() * 19 + 1) * box };
+    let dir;
+    let score = 0;
+    let baseSpeed = 150;
+    let shiftSpeed = 60;
+    let currentSpeed = baseSpeed;
+    let gameLoop;
 
-    function hideAll() {
-        document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden'));
-        document.getElementById('game-stage').style.display = 'none';
-    }
-
-    function showHome() { hideAll(); document.getElementById('home-content').classList.remove('hidden'); }
-    function showSection(id) { hideAll(); document.getElementById(id).classList.remove('hidden'); }
-
-    // --- YILAN OYUNU ---
-    let canv = document.getElementById("gc");
-    let ctx = canv.getContext("2d");
-    let px=py=10, gs=20, tc=20, ax=ay=15, xv=yv=0, snake=[], tail=5, gameInterval;
-
-    function startSnake() {
-        hideAll(); document.getElementById('games-section').classList.remove('hidden');
-        document.getElementById('game-stage').style.display = 'block';
-        xv=yv=0; px=py=10; tail=5; snake=[];
-        clearInterval(gameInterval);
-        gameInterval = setInterval(updateSnake, 1000/15);
-    }
-
-    function updateSnake() {
-        px+=xv; py+=yv;
-        if(px<0) px=tc-1; if(px>tc-1) px=0; if(py<0) py=tc-1; if(py>tc-1) py=0;
-        ctx.fillStyle="#000"; ctx.fillRect(0,0,canv.width,canv.height);
-        ctx.fillStyle="#2ecc71";
-        for(let i=0;i<snake.length;i++) {
-            ctx.fillRect(snake[i].x*gs,snake[i].y*gs,gs-2,gs-2);
-            if(snake[i].x==px && snake[i].y==py) tail=5;
-        }
-        snake.push({x:px,y:py});
-        while(snake.length>tail) snake.shift();
-        if(ax==px && ay==py) { tail++; ax=Math.floor(Math.random()*tc); ay=Math.floor(Math.random()*tc); }
-        ctx.fillStyle="#e94560"; ctx.fillRect(ax*gs,ay*gs,gs-2,gs-2);
-    }
-
-    document.addEventListener("keydown", (e) => {
-        switch(e.keyCode) {
-            case 37: if(xv!==1) {xv=-1; yv=0;} break;
-            case 38: if(yv!==1) {xv=0; yv=-1;} break;
-            case 39: if(xv!==-1) {xv=1; yv=0;} break;
-            case 40: if(yv!==-1) {xv=0; yv=1;} break;
-        }
+    // Shift Kontrolü
+    document.addEventListener("keydown", e => {
+        if(e.code === "ShiftLeft") currentSpeed = shiftSpeed;
+        if(e.keyCode == 37 && dir != "RIGHT") dir = "LEFT";
+        if(e.keyCode == 38 && dir != "DOWN") dir = "UP";
+        if(e.keyCode == 39 && dir != "LEFT") dir = "RIGHT";
+        if(e.keyCode == 40 && dir != "UP") dir = "DOWN";
     });
+    document.addEventListener("keyup", e => {
+        if(e.code === "ShiftLeft") currentSpeed = baseSpeed;
+    });
+
+    function startSnakeGame() {
+        document.getElementById("main-menu").classList.add("hidden");
+        document.getElementById("game-canvas-container").style.display = "flex";
+        runGame();
+    }
+
+    function draw() {
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = 0; i < snake.length; i++) {
+            ctx.fillStyle = (i == 0) ? varColor() : "white";
+            ctx.fillRect(snake[i].x, snake[i].y, box - 2, box - 2);
+        }
+
+        ctx.fillStyle = "red";
+        ctx.fillRect(food.x, food.y, box - 2, box - 2);
+
+        let snakeX = snake[0].x;
+        let snakeY = snake[0].y;
+
+        if (dir == "LEFT") snakeX -= box;
+        if (dir == "UP") snakeY -= box;
+        if (dir == "RIGHT") snakeX += box;
+        if (dir == "DOWN") snakeY += box;
+
+        // DUVARA ÇARPMA KONTROLÜ
+        if (snakeX < 0 || snakeX >= canvas.width || snakeY < 0 || snakeY >= canvas.height || collision(newHead, snake)) {
+            gameOver();
+            return;
+        }
+
+        let newHead = { x: snakeX, y: snakeY };
+
+        if (snakeX == food.x && snakeY == food.y) {
+            score++;
+            document.getElementById("stat-score").innerText = "Puan: " + score;
+            food = { x: Math.floor(Math.random() * 19 + 1) * box, y: Math.floor(Math.random() * 19 + 1) * box };
+            checkLevelUp();
+        } else {
+            snake.pop();
+        }
+
+        if (collision(newHead, snake)) {
+            gameOver();
+            return;
+        }
+
+        snake.unshift(newHead);
+    }
+
+    function collision(head, array) {
+        for (let i = 0; i < array.length; i++) {
+            if (head.x == array[i].x && head.y == array[i].y) return true;
+        }
+        return false;
+    }
+
+    function checkLevelUp() {
+        let levelThreshold = userData.world * 10; 
+        if(score >= levelThreshold) {
+            userData.level++;
+            if(userData.level > 10) {
+                userData.world++;
+                userData.level = 1;
+            }
+            saveData();
+            document.getElementById("stat-level").innerText = `Dünya: ${userData.world}-${userData.level}`;
+            alert(`TEBRİKLER! Dünya ${userData.world} seviyesine geçtin!`);
+        }
+    }
+
+    function gameOver() {
+        clearInterval(gameLoop);
+        document.getElementById("game-over").style.display = "flex";
+        document.getElementById("final-stats").innerText = `Dünya: ${userData.world} | Puan: ${score}`;
+    }
+
+    function runGame() {
+        clearInterval(gameLoop);
+        draw();
+        gameLoop = setTimeout(runGame, currentSpeed);
+    }
+
+    function varColor() {
+        return userData.skin === 'gold' ? 'gold' : '#00ff41';
+    }
+
+    // MENÜ FONKSİYONLARI
+    function openSettings() {
+        let newVol = prompt("Ses Seviyesi (0-100):", userData.settings.volume);
+        if(newVol) { userData.settings.volume = newVol; saveData(); }
+    }
+
+    function openSkins() {
+        let choice = confirm("Altın Skin kullanmak ister misin?");
+        userData.skin = choice ? 'gold' : 'default';
+        saveData();
+        alert("Karakter güncellendi!");
+    }
 </script>
 </body>
 </html>
