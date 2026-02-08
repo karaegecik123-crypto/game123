@@ -182,19 +182,46 @@
         if(player.segments.length > player.size) player.segments.pop();
 
         // --- GELİŞMİŞ ÇARPIŞMA MOTORU (IO RULES) ---
+        // --- ÇARPIŞMA MOTORU (v1.6.1 REVIZE) ---
         const allSnakes = [player, ...ais.filter(a => a.alive)];
         
         allSnakes.forEach(snakeA => {
             const headA = snakeA.segments[0];
+        
             allSnakes.forEach(snakeB => {
-                // KENDİ VÜCUDUNA ÇARPMA SERBEST (SADECE BAŞKASINA ÇARPMAK ÖLDÜRÜR)
-                if(snakeA === snakeB) return; 
-
+                // KURAL: Kendi vücuduna çarparsa hiçbir şey olmaz (Snake.io kuralı)
+                if (snakeA === snakeB) return; 
+        
                 snakeB.segments.forEach((segB, indexB) => {
                     let dist = Math.hypot(headA.x - segB.x, headA.y - segB.y);
-                    if(dist < 12) {
-                        if(snakeA === player) die(snakeB.name + " sineğine çarptın!");
-                        else killSnake(snakeA);
+        
+                    if (dist < 12) { 
+                        // 1. DURUM: KAFA KAFAYA ÇARPIŞMA
+                        if (indexB === 0) {
+                            if (snakeA.size > snakeB.size) {
+                                // SnakeA büyükse SnakeB ölür
+                                killSnake(snakeB);
+                                if(snakeA === player) score += 100;
+                            } else {
+                                // SnakeB büyükse SnakeA ölür
+                                if (snakeA === player) {
+                                    die(snakeB.name + " seni kafa kafaya yedi!");
+                                } else {
+                                    killSnake(snakeA);
+                                }
+                            }
+                        } 
+                        // 2. DURUM: BAŞKASININ YAN TARAFINA (GÖVDESİNE) ÇARPMA
+                        else {
+                            if (snakeA === player) {
+                                // Oyuncu başkasının gövdesine çarparsa oyuncu ölür
+                                die(snakeB.name + " sineğinin yan tarafına çarptın!");
+                            } else {
+                                // AI başkasının (oyuncu veya diğer AI) gövdesine çarparsa AI ölür
+                                killSnake(snakeA);
+                                if(snakeB === player) score += 50; // AI sana çarptıysa puan alırsın
+                            }
+                        }
                     }
                 });
             });
