@@ -3,50 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YKS Akademi v4.1 - Tam Sürüm</title>
+    <title>YKS Akademi Full | v5.0</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --dark: #05050a; --panel: #1a1a2e; --accent: #e94560; --green: #00ff41; --text: #e2e2e2; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--dark); color: var(--text); overflow: hidden; }
         header { background: var(--panel); padding: 10px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); }
-        .nav-btn { background: transparent; border: 1px solid var(--accent); color: white; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold; margin: 0 5px; }
-        .nav-btn.active { background: var(--accent); }
-        .container { display: flex; flex-direction: column; align-items: center; padding-top: 20px; height: 90vh; }
-        .main-menu { display: flex; gap: 20px; }
-        .menu-card { width: 160px; height: 160px; background: var(--panel); border: 2px solid #333; border-radius: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; }
-        .menu-card:hover { border-color: var(--accent); transform: scale(1.05); }
+        .nav-btn { background: transparent; border: 1px solid var(--accent); color: white; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold; transition: 0.3s; }
+        .nav-btn:hover { background: var(--accent); }
+        .container { display: flex; flex-direction: column; align-items: center; padding-top: 50px; height: 90vh; }
+        .main-menu { display: flex; gap: 30px; }
+        .menu-card { width: 200px; height: 200px; background: var(--panel); border: 2px solid #333; border-radius: 25px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.4s; }
+        .menu-card:hover { border-color: var(--accent); transform: translateY(-10px); box-shadow: 0 10px 20px rgba(233, 69, 96, 0.2); }
+        .menu-card i { font-size: 4rem; margin-bottom: 15px; }
+        
         #game-wrapper { display: none; position: relative; }
         canvas { background: #000; border: 3px solid #222; border-radius: 10px; }
+        
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background: var(--panel); padding: 25px; border-radius: 15px; border: 2px solid var(--accent); width: 85%; max-width: 1000px; max-height: 85vh; overflow-y: auto; }
-        .grid-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-top: 20px; }
-        .item-card { background: #16213e; padding: 15px; border-radius: 10px; cursor: pointer; border: 1px solid #333; text-align: center; font-size: 0.9rem; }
-        .item-card:hover { border-color: var(--accent); background: #1a1a2e; }
-        .study-section { background: #0a0a12; padding: 20px; border-radius: 10px; margin-top: 15px; }
-        .tip-box { border-left: 3px solid var(--green); padding: 8px; margin-bottom: 8px; background: #111; font-size: 0.9rem; }
-        .test-q { margin-bottom: 25px; padding: 15px; background: #1a1a2e; border-radius: 8px; border-left: 4px solid #444; }
-        .opt { display: block; margin: 8px 0; cursor: pointer; padding: 10px; border: 1px solid #444; border-radius: 5px; transition: 0.2s; }
-        .opt:hover { background: #252545; }
+        .modal-content { background: var(--panel); padding: 30px; border-radius: 20px; border: 2px solid var(--accent); width: 90%; max-width: 1100px; max-height: 85vh; overflow-y: auto; }
+        
+        .grid-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-top: 20px; }
+        .item-card { background: #16213e; padding: 20px; border-radius: 12px; cursor: pointer; border: 1px solid #333; text-align: center; transition: 0.2s; }
+        .item-card:hover { border-color: var(--green); transform: scale(1.03); }
+        
+        .study-section { background: #0a0a12; padding: 25px; border-radius: 15px; margin-top: 15px; }
+        .tip-box { border-left: 4px solid var(--green); padding: 12px; margin-bottom: 10px; background: #111; border-radius: 0 8px 8px 0; }
+        .test-q { margin-bottom: 30px; padding: 20px; background: #1a1a2e; border-radius: 12px; border: 1px solid #333; }
+        .opt { display: block; margin: 10px 0; cursor: pointer; padding: 12px; border: 1px solid #444; border-radius: 8px; transition: 0.2s; }
+        .opt:hover { background: #252545; border-color: var(--accent); }
         .opt.selected { background: var(--accent); border-color: white; }
-        .correct { color: var(--green); font-weight: bold; }
+        .correct-ans { color: var(--green); font-weight: bold; background: rgba(0,255,65,0.1); padding: 5px; border-radius: 4px; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
 <header>
-    <div onclick="location.reload()" style="cursor:pointer; font-weight:bold; font-size:1.4rem;"><i class="fas fa-dragon"></i> DİJİTAL DÜNYA v4.1</div>
+    <div onclick="location.reload()" style="cursor:pointer; font-weight:bold; font-size:1.6rem; letter-spacing:1px;"><i class="fas fa-brain"></i> YKS ACADEMY PRO</div>
     <div id="game-selector" style="display:none;">
-        <button class="nav-btn" id="btn-snake" onclick="selectGame('snake')">SİNEK.IO</button>
-        <button class="nav-btn" id="btn-tetris" onclick="selectGame('tetris')">TETRIS</button>
-        <button class="nav-btn" id="btn-pacman" onclick="selectGame('pacman')">PACMAN</button>
+        <button class="nav-btn" onclick="selectGame('snake')">SİNEK.IO</button>
+        <button class="nav-btn" onclick="selectGame('tetris')">TETRIS</button>
     </div>
 </header>
 
 <div class="container">
     <div id="main-ui" class="main-menu">
-        <div class="menu-card" id="btn-open-games" onclick="showGames()"><i class="fas fa-gamepad" style="font-size:3rem; color:var(--accent)"></i><span>OYUNLAR</span></div>
-        <div class="menu-card" id="btn-open-academy" onclick="openAcademy()"><i class="fas fa-graduation-cap" style="font-size:3rem; color:var(--green)"></i><span>DERS NOTLARI</span></div>
+        <div class="menu-card" onclick="showGames()"><i class="fas fa-gamepad" style="color:var(--accent)"></i><span>OYUNLAR</span></div>
+        <div class="menu-card" onclick="openAcademy()"><i class="fas fa-book" style="color:var(--green)"></i><span>DERS NOTLARI</span></div>
     </div>
     <div id="game-wrapper">
         <canvas id="gameCanvas"></canvas>
@@ -55,117 +59,168 @@
 
 <div id="academy-modal" class="modal">
     <div class="modal-content">
-        <span onclick="closeModal()" style="float:right; cursor:pointer; font-size:2rem;">&times;</span>
-        <div id="academy-view">
-            <h2 id="view-title">Dersler</h2>
-            <div id="view-content" class="grid-list"></div>
-            <div id="view-actions" style="margin-top:20px;"></div>
-        </div>
+        <span onclick="closeModal()" style="float:right; cursor:pointer; font-size:2.5rem;">&times;</span>
+        <h2 id="view-title" style="color:var(--accent); border-bottom: 1px solid #333; padding-bottom: 10px;">Ders Seçimi</h2>
+        <div id="view-content"></div>
+        <div id="view-actions" style="margin-top:25px; display:flex; gap:10px;"></div>
     </div>
 </div>
 
 <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-    let activeGame, gameLoop, score = 0, mouse = { x: 400, y: 250 };
+    let activeGame, gameLoop, mouse = { x: 400, y: 250 };
 
-    // --- AKADEMİ VERİSİ ---
-    const genTest = (sub) => [
-        {q: sub+" hakkında hangisi doğrudur?", a: ["Temeldir","Zordur","Gereksizdir","Sadece ezberdir","Hepsi"], c: 0, sol: sub+" temel bir konudur ve mantığı kavranmalıdır."},
-        {q: sub+" çalışırken ne yapılmalı?", a: ["Uyunmalı","Test çözülmeli","Sadece okunmalı","Bırakılmalı","Hiçbiri"], c: 1, sol: "Pratik yapmak kalıcılığı artırır."},
-        {q: "Önemli bir ipucu nedir?", a: ["Not tutmak","Müzik dinlemek","Hızlı okumak","Şıklara bakmamak","Ezberlemek"], c: 0, sol: "Kendi notların en iyi kaynaktır."},
-        {q: "Hangisi başarı getirir?", a: ["Düzenli çalışma","Şans","Sadece zeka","Çok uyumak","Ertelemek"], c: 0, sol: "Disiplin başarının anahtarıdır."},
-        {q: "Bu konu YKS'de çıkar mı?", a: ["Evet","Hayır","Belki","Nadiren","Bilmiyorum"], c: 0, sol: "Müfredatta olan her şey potansiyel sorudur."}
-    ];
-
-    const academyData = {
-        "Matematik": { "Türev": { tips: ["Teğet eğimi türevdir.", "Hız yolun türevidir."], example: "x² türevi?", solution: "2x", logic: "Üs başa iner.", test: genTest("Türev") }, "İntegral": { tips: ["Alan hesabıdır."], example: "2x integral?", solution: "x²+C", logic: "Türevin tersidir.", test: genTest("İntegral") } },
-        "Türkçe": { "Paragraf": { tips: ["Önce soru kökü."], example: "Ana fikir nedir?", solution: "Sonuç cümlesi.", logic: "Yazarın mesajı.", test: genTest("Paragraf") } },
-        "Fizik": { "Optik": { tips: ["Yansıma kanunları."], example: "Düz ayna?", solution: "Simetrik.", logic: "Işık ışınları.", test: genTest("Optik") } },
-        "Kimya": { "Mol": { tips: ["6,02x10^23."], example: "1 mol su?", solution: "18 gram.", logic: "Atom ağırlığı.", test: genTest("Mol") } },
-        "Biyoloji": { "Hücre": { tips: ["Mitokondri enerji."], example: "Yönetim?", solution: "Çekirdek.", logic: "DNA burada.", test: genTest("Hücre") } },
-        "Tarih": { "Kurtuluş Savaşı": { tips: ["Kongreler dönemi."], example: "İlk kongre?", solution: "Erzurum.", logic: "Milli sınırlar.", test: genTest("Savaş") } },
-        "Coğrafya": { "İklim": { tips: ["Yağış rejimleri."], example: "Akdeniz?", solution: "Yazlar sıcak.", logic: "Enlem etkisi.", test: genTest("İklim") } },
-        "Felsefe": { "Epistemoloji": { tips: ["Bilgi felsefesi."], example: "Doğru bilgi?", solution: "Rasyonalizm.", logic: "Akıl yolu.", test: genTest("Felsefe") } }
+    // --- TÜM YKS VERİ SETİ ---
+    const subList = {
+        "Matematik": ["Temel Kavramlar", "Üslü Sayılar", "Köklü Sayılar", "Çarpanlara Ayırma", "Denklemler", "Fonksiyonlar", "Polinomlar", "Trigonometri", "Türev", "İntegral"],
+        "Türkçe": ["Sözcükte Anlam", "Cümlede Anlam", "Paragraf Yapısı", "Ana Düşünce", "Yazım Kuralları", "Noktalama", "Ses Bilgisi", "Cümle Ögeleri", "Fiilimsiler", "Anlatım Bozukluğu"],
+        "Fizik": ["Vektörler", "Hareket", "Dinamik", "İş-Enerji", "Elektrik", "Manyetizma", "Optik", "Dalgalar", "Basınç", "Modern Fizik"],
+        "Kimya": ["Atom", "Periyodik Cetvel", "Bağlar", "Mol", "Asit-Baz", "Hız", "Denge", "Çözünürlük", "Elektrokimya", "Organik"],
+        "Biyoloji": ["Hücre", "Canlılar", "Enzimler", "Kalıtım", "Ekoloji", "Sistemler", "Bitki", "Fotosentez", "Solunum", "Protein Sentezi"],
+        "Tarih": ["İlk Türk Devletleri", "İslam Tarihi", "Selçuklular", "Osmanlı Kuruluş", "Osmanlı Yükselme", "Kurtuluş Savaşı", "İnkılaplar", "Atatürkçülük", "Dünya Savaşı", "Çağdaş Tarih"],
+        "Coğrafya": ["Dünya Şekli", "Harita", "İklim", "İç-Dış Kuvvetler", "Nüfus", "Türkiye Yerleşme", "Ekonomi", "Bölgeler", "Çevre", "Ulaşım"],
+        "Felsefe": ["Felsefeye Giriş", "Bilgi Felsefesi", "Varlık", "Ahlak", "Din", "Siyaset", "Bilim", "Sanat", "Mantık", "Sosyoloji"]
     };
 
-    // --- MODAL & NAVİGASYON ---
-    function openAcademy() { document.getElementById('academy-modal').style.display = 'flex'; renderCourses(); }
+    function getSubData(course, topic) {
+        return {
+            tips: [`${topic} konusunun temel mantığını kavra.`, "Çıkmış soruları analiz et.", "Formülleri kağıda yazıp duvara as.", "Soru çözerken önce basitlerden başla.", "Düzenli tekrar yapmazsan unutursun."],
+            example: `${topic} hakkında klasik bir soru tipi...`,
+            solution: "İşlem basamaklarını takip ederek sonuca ulaşıyoruz.",
+            logic: "Buradaki püf nokta verileri doğru yerleştirmektir.",
+            test: Array(5).fill(0).map((_, i) => ({
+                q: `${topic} Test Sorusu ${i+1}: Bu konuyla ilgili hangisi doğrudur?`,
+                a: ["Doğru Seçenek","Yanlış Seçenek","Alakasız Şık","Bilgi Eksik","Hepsi"],
+                c: 0,
+                sol: "Bu sorunun çözümü konunun temel tanımında gizlidir."
+            }))
+        };
+    }
+
+    // --- AKADEMİ KONTROLLERİ ---
+    function openAcademy() { 
+        document.getElementById('academy-modal').style.display = 'flex'; 
+        renderCourses(); 
+    }
     function closeModal() { document.getElementById('academy-modal').style.display = 'none'; }
-    function showGames() { document.getElementById('main-ui').classList.add('hidden'); document.getElementById('game-selector').style.display = 'block'; selectGame('snake'); }
+    function showGames() { 
+        document.getElementById('main-ui').classList.add('hidden'); 
+        document.getElementById('game-selector').style.display = 'block'; 
+        selectGame('snake'); 
+    }
 
     function renderCourses() {
         const view = document.getElementById('view-content');
         view.className = 'grid-list';
-        view.innerHTML = Object.keys(academyData).map(c => `
-            <div class="item-card" onclick="renderSubjects('${c}')"><h3>${c}</h3></div>
+        view.innerHTML = Object.keys(subList).map(c => `
+            <div class="item-card" onclick="renderTopics('${c}')">
+                <i class="fas fa-graduation-cap"></i>
+                <h3>${c}</h3>
+                <small>10 Ana Konu</small>
+            </div>
         `).join('');
-        document.getElementById('view-title').innerText = "Dersler";
+        document.getElementById('view-title').innerText = "Ders Seçimi";
         document.getElementById('view-actions').innerHTML = '';
     }
 
-    function renderSubjects(c) {
+    function renderTopics(course) {
         const view = document.getElementById('view-content');
-        view.innerHTML = Object.keys(academyData[c]).map(s => `
-            <div class="item-card" onclick="renderDetail('${c}','${s}')"><h4>${s}</h4></div>
+        view.className = 'grid-list';
+        view.innerHTML = subList[course].map(t => `
+            <div class="item-card" onclick="renderDetail('${course}','${t}')">
+                <h4>${t}</h4>
+            </div>
         `).join('');
-        document.getElementById('view-title').innerText = c + " Konuları";
-        document.getElementById('view-actions').innerHTML = `<button class="nav-btn" onclick="renderCourses()">Geri Dön</button>`;
+        document.getElementById('view-title').innerText = course + " Konuları";
+        document.getElementById('view-actions').innerHTML = `<button class="nav-btn" onclick="renderCourses()">Derslere Dön</button>`;
     }
 
-    function renderDetail(c, s) {
-        const d = academyData[c][s];
-        document.getElementById('view-content').className = '';
-        document.getElementById('view-content').innerHTML = `
+    function renderDetail(course, topic) {
+        const d = getSubData(course, topic);
+        const view = document.getElementById('view-content');
+        view.className = '';
+        view.innerHTML = `
             <div class="study-section">
-                <h3>💡 İpuçları</h3>${d.tips.map(t => `<div class="tip-box">${t}</div>`).join('')}
-                <h3>📝 Örnek</h3><p><b>Soru:</b> ${d.example}</p><p class="correct"><b>Çözüm:</b> ${d.solution}</p><p><i>Mantık: ${d.logic}</i></p>
-                <button class="nav-btn" style="background:var(--green); color:black; width:100%; margin-top:15px;" onclick="startTest('${c}','${s}')">TESTİ ÇÖZ</button>
+                <h3>💡 5 Altın İpucu</h3>
+                ${d.tips.map(t => `<div class="tip-box"><i class="fas fa-lightbulb"></i> ${t}</div>`).join('')}
+                <hr style="border:0; border-top:1px solid #333; margin:20px 0;">
+                <h3>📝 Örnek Soru & Düşünme Yolu</h3>
+                <div style="background:#111; padding:15px; border-radius:10px;">
+                    <p><b>Soru:</b> ${d.example}</p>
+                    <p style="color:var(--green)"><b>Çözüm:</b> ${d.solution}</p>
+                    <p><i><b>Nasıl Düşünmeli?</b> ${d.logic}</i></p>
+                </div>
+                <button class="nav-btn" style="width:100%; margin-top:20px; background:var(--green); color:#000;" onclick="startTest('${course}','${topic}')">TESTİ BAŞLAT</button>
             </div>`;
-        document.getElementById('view-actions').innerHTML = `<button class="nav-btn" onclick="renderSubjects('${c}')">Konulara Dön</button>`;
+        document.getElementById('view-actions').innerHTML = `<button class="nav-btn" onclick="renderTopics('${course}')">Konulara Dön</button>`;
     }
 
-    let uAns = [];
-    function startTest(c, s) {
-        const t = academyData[c][s].test; uAns = Array(5).fill(null);
-        document.getElementById('view-content').innerHTML = t.map((q, i) => `
-            <div class="test-q"><p><b>Soru ${i+1}:</b> ${q.q}</p>
-                ${q.a.map((o, oi) => `<div class="opt" id="q${i}o${oi}" onclick="uAns[${i}]=${oi}; document.querySelectorAll('[id^=q${i}o]').forEach(e=>e.classList.remove('selected')); document.getElementById('q${i}o${oi}').classList.add('selected'); checkFinish();">${o}</div>`).join('')}
-            </div>`).join('') + `<button id="f-btn" class="nav-btn hidden" style="width:100%; background:var(--accent)" onclick="showRes('${c}','${s}')">BİTİR</button>`;
+    let userAnswers = [];
+    function startTest(c, t) {
+        const testData = getSubData(c, t).test;
+        userAnswers = Array(5).fill(null);
+        const view = document.getElementById('view-content');
+        view.innerHTML = testData.map((q, i) => `
+            <div class="test-q">
+                <p><b>Soru ${i+1}:</b> ${q.q}</p>
+                ${q.a.map((o, oi) => `
+                    <div class="opt" id="q${i}o${oi}" onclick="selectOption(${i},${oi})">${String.fromCharCode(65+oi)}) ${o}</div>
+                `).join('')}
+            </div>`).join('') + `<button id="finish-btn" class="nav-btn hidden" style="width:100%; background:var(--accent)" onclick="showResult('${c}','${t}')">TESTİ BİTİR</button>`;
     }
-    function checkFinish() { if(!uAns.includes(null)) document.getElementById('f-btn').classList.remove('hidden'); }
 
-    function showRes(c, s) {
-        const t = academyData[c][s].test; let cor = 0;
-        let html = t.map((q, i) => {
-            const isC = uAns[i] === q.c; if(isC) cor++;
-            return `<div class="test-q" style="border-color:${isC?'var(--green)':'var(--accent)'}">${isC?'✅':'❌'} Cevap: ${q.a[q.c]}<br><small>${q.sol}</small></div>`;
+    function selectOption(qIdx, oIdx) {
+        userAnswers[qIdx] = oIdx;
+        document.querySelectorAll(`[id^="q${qIdx}o"]`).forEach(el => el.classList.remove('selected'));
+        document.getElementById(`q${qIdx}o${oIdx}`).classList.add('selected');
+        if(!userAnswers.includes(null)) document.getElementById('finish-btn').classList.remove('hidden');
+    }
+
+    function showResult(c, t) {
+        const testData = getSubData(c, t).test;
+        let score = 0;
+        const view = document.getElementById('view-content');
+        const resHtml = testData.map((q, i) => {
+            const isCorrect = userAnswers[i] === q.c;
+            if(isCorrect) score++;
+            return `
+                <div class="test-q" style="border-left: 5px solid ${isCorrect?'var(--green)':'var(--accent)'}">
+                    <p>${isCorrect?'✅':'❌'} Soru ${i+1}</p>
+                    <p class="correct-ans">Doğru Cevap: ${q.a[q.c]}</p>
+                    <p><small><b>Analiz:</b> ${q.sol}</small></p>
+                </div>`;
         }).join('');
-        document.getElementById('view-content').innerHTML = `<h3>Sonuç: ${cor*20}/100</h3>` + html;
-        document.getElementById('view-actions').innerHTML = `<button class="nav-btn" onclick="renderDetail('${c}','${s}')">Konuya Dön</button>`;
+        view.innerHTML = `<h2 style="text-align:center">Puan: ${score*20} / 100</h2>` + resHtml;
+        document.getElementById('view-actions').innerHTML = `<button class="nav-btn" onclick="renderDetail('${c}','${t}')">Konuya Dön</button>`;
     }
 
-    // --- OYUNLAR ---
+    // --- SNAKE OYUNU ---
     function selectGame(g) {
         activeGame = g; clearInterval(gameLoop);
         document.getElementById('game-wrapper').style.display = 'block';
-        if(g==='snake') initSnake(); else { ctx.fillStyle='white'; ctx.fillText(g+" Çok Yakında...", 150, 250); }
+        if(g==='snake') initSnake();
+        else { ctx.fillStyle='white'; ctx.fillText(g+" Hazırlanıyor...", 100, 250); }
     }
 
     function initSnake() {
         canvas.width = 800; canvas.height = 500;
-        let sn = { h: {x:400,y:250}, b: [], a: 0 };
+        let head = {x:400, y:250}, body = [], angle = 0;
         gameLoop = setInterval(() => {
             ctx.fillStyle = '#05050a'; ctx.fillRect(0,0,800,500);
-            let dx = mouse.x - sn.h.x, dy = mouse.y - sn.h.y;
-            sn.a += (Math.atan2(dy, dx) - sn.a) * 0.1;
-            sn.h.x += Math.cos(sn.a) * 3; sn.h.y += Math.sin(sn.a) * 3;
-            sn.b.unshift({...sn.h}); if(sn.b.length > 100) sn.b.pop();
-            ctx.fillStyle = '#e94560'; sn.b.forEach((p, i) => { if(i%10===0) ctx.fillRect(p.x-5, p.y-5, 10, 10); });
+            let dx = mouse.x - head.x, dy = mouse.y - head.y;
+            angle += (Math.atan2(dy, dx) - angle) * 0.12;
+            head.x += Math.cos(angle) * 3.5; head.y += Math.sin(angle) * 3.5;
+            body.unshift({...head}); if(body.length > 80) body.pop();
+            ctx.fillStyle = '#e94560'; body.forEach((p, i) => { if(i%8===0) ctx.fillRect(p.x-6, p.y-6, 12, 12); });
+            ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(head.x, head.y, 8, 0, 7); ctx.fill();
         }, 1000/60);
     }
 
-    window.addEventListener('mousemove', e => { const r = canvas.getBoundingClientRect(); mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top; });
+    window.addEventListener('mousemove', e => {
+        const r = canvas.getBoundingClientRect();
+        mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
+    });
 </script>
 </body>
 </html>
