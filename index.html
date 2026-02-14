@@ -3,122 +3,277 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benim Dünyam | v2.2.0 - Pro Edition</title>
+    <title>Benim Dünyam | v3.0.0 - Akademi & Oyun</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --dark: #0a0a12; --blue: #16213e; --accent: #e94560; --green: #00ff41; --text: #e2e2e2; }
+        :root { --dark: #05050a; --panel: #1a1a2e; --accent: #e94560; --green: #00ff41; --text: #e2e2e2; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--dark); color: var(--text); overflow: hidden; }
-        header { background: #1a1a2e; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); }
-        .version-group { background: var(--accent); padding: 5px 15px; border-radius: 15px; font-weight: bold; }
-        .container { display: flex; flex-direction: column; align-items: center; min-height: 80vh; padding-top: 50px; }
-        .game-nav { display: none; justify-content: center; gap: 10px; background: #16213e; padding: 15px; width: 100%; }
-        .nav-btn { background: transparent; border: 1px solid var(--accent); color: white; padding: 8px 20px; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        
+        header { background: var(--panel); padding: 10px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); }
+        .nav-btn { background: transparent; border: 1px solid var(--accent); color: white; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold; margin: 0 5px; }
         .nav-btn.active { background: var(--accent); }
-        .main-menu { display: flex; gap: 25px; }
-        .menu-card { width: 180px; height: 180px; background: #1a1a2e; border: 2px solid #333; border-radius: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; }
-        .menu-card:hover { border-color: var(--accent); transform: translateY(-10px); }
-        .menu-card i { font-size: 3rem; margin-bottom: 15px; color: var(--accent); }
+
+        .container { display: flex; flex-direction: column; align-items: center; padding-top: 30px; height: 90vh; }
+        .main-menu { display: flex; gap: 20px; }
+        .menu-card { width: 160px; height: 160px; background: var(--panel); border: 2px solid #333; border-radius: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; }
+        .menu-card:hover { border-color: var(--accent); transform: scale(1.05); }
+
         #game-wrapper { display: none; position: relative; }
         canvas { background: #000; border: 3px solid #222; border-radius: 10px; }
-        #leaderboard { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.85); padding: 10px; border: 1px solid var(--accent); border-radius: 5px; min-width: 140px; font-family: monospace; display: none; }
-        .lb-row { display: flex; justify-content: space-between; font-size: 0.9rem; margin: 2px 0; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background: #1a1a2e; padding: 30px; border-radius: 15px; border: 2px solid var(--accent); width: 600px; max-height: 85vh; overflow-y: auto; position: relative; }
-        .course-btn { background: #16213e; border: 1px solid var(--accent); color: white; padding: 15px; border-radius: 8px; cursor: pointer; text-align: center; margin: 5px; }
-        .subject-detail { background: #000; padding: 15px; border-left: 4px solid var(--green); margin-bottom: 10px; }
+        #leaderboard { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.8); padding: 10px; border: 1px solid var(--accent); display: none; min-width: 120px; }
+
+        /* AKADEMİ MODAL */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: var(--panel); padding: 25px; border-radius: 15px; border: 2px solid var(--accent); width: 80%; max-width: 900px; max-height: 85vh; overflow-y: auto; }
+        
+        .grid-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
+        .item-card { background: #16213e; padding: 15px; border-radius: 10px; cursor: pointer; border: 1px solid #333; text-align: center; }
+        .item-card:hover { border-color: var(--accent); }
+
+        .study-section { background: #0a0a12; padding: 20px; border-radius: 10px; margin-top: 15px; }
+        .tip-box { border-left: 3px solid var(--green); padding-left: 10px; margin-bottom: 10px; background: #111; padding: 8px; }
+        .test-q { margin-bottom: 25px; padding: 15px; background: #1a1a2e; border-radius: 8px; }
+        .opt { display: block; margin: 8px 0; cursor: pointer; padding: 8px; border: 1px solid #444; border-radius: 5px; }
+        .opt:hover { background: #252545; }
+        .opt.selected { background: var(--accent); border-color: white; }
+        .correct { color: var(--green); font-weight: bold; }
+        .wrong { color: var(--accent); font-weight: bold; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
 <header>
-    <div onclick="showHome()" style="cursor:pointer; font-weight: bold;"><i class="fas fa-dragon"></i> DİJİTAL DÜNYA</div>
-    <div class="version-group">v2.2.0</div>
+    <div onclick="showHome()" style="cursor:pointer; font-weight:bold;"><i class="fas fa-university"></i> YKS AKADEMİ v3.0</div>
+    <div id="game-selector" style="display:none;">
+        <button class="nav-btn" id="btn-snake" onclick="selectGame('snake')">SİNEK.IO</button>
+        <button class="nav-btn" id="btn-tetris" onclick="selectGame('tetris')">TETRIS</button>
+        <button class="nav-btn" id="btn-pacman" onclick="selectGame('pacman')">PACMAN</button>
+    </div>
 </header>
-
-<div id="game-selector" class="game-nav">
-    <button class="nav-btn" id="btn-snake" onclick="selectGame('snake')">SİNEK.IO</button>
-    <button class="nav-btn" id="btn-tetris" onclick="selectGame('tetris')">TETRIS</button>
-    <button class="nav-btn" id="btn-pacman" onclick="selectGame('pacman')">PACMAN</button>
-</div>
 
 <div class="container">
     <div id="main-ui" class="main-menu">
-        <div class="menu-card" onclick="showGames()"><i class="fas fa-gamepad"></i><span>OYUNLAR</span></div>
-        <div class="menu-card" onclick="toggleModal('study-modal')"><i class="fas fa-graduation-cap"></i><span>DERS NOTLARI</span></div>
+        <div class="menu-card" onclick="showGames()"><i class="fas fa-gamepad" style="font-size:3rem; color:var(--accent)"></i><span>OYUNLAR</span></div>
+        <div class="menu-card" onclick="openAcademy()"><i class="fas fa-book-open" style="font-size:3rem; color:var(--green)"></i><span>DERS NOTLARI</span></div>
     </div>
 
     <div id="game-wrapper">
-        <div id="leaderboard">
-            <div style="text-align:center; color:var(--accent); font-weight:bold;">LİDERLER</div>
-            <div id="lb-list"></div>
-        </div>
+        <div id="leaderboard"></div>
         <canvas id="gameCanvas"></canvas>
-        <div id="game-over" class="modal" style="position: absolute;">
-            <div class="modal-content" style="text-align:center;">
-                <h1 style="color:var(--accent)">OYUN BİTTİ!</h1>
-                <p id="death-reason"></p>
-                <button class="nav-btn" onclick="startGame()">TEKRAR</button>
-                <button class="nav-btn" onclick="showHome()">MENÜ</button>
-            </div>
-        </div>
     </div>
 </div>
 
-<div id="study-modal" class="modal">
+<div id="academy-modal" class="modal">
     <div class="modal-content">
-        <span onclick="toggleModal('study-modal')" style="float:right; cursor:pointer;">&times;</span>
-        <h2 id="study-title">YKS Notları</h2>
-        <div id="study-body"><div style="display: grid; grid-template-columns: 1fr 1fr;" id="course-list"></div></div>
-        <button id="back-btn" class="nav-btn hidden" onclick="renderCourses()" style="margin-top:20px;">Geri Dön</button>
+        <span onclick="closeModal()" style="float:right; cursor:pointer; font-size:2rem;">&times;</span>
+        <div id="academy-view">
+            <h2 id="view-title">Dersler</h2>
+            <div id="view-content" class="grid-list"></div>
+            <div id="view-actions" style="margin-top:20px;"></div>
+        </div>
     </div>
 </div>
 
 <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-    let activeGame = 'snake', gameLoop, score = 0;
+    let activeGame, gameLoop, score = 0;
     let mouse = { x: 400, y: 250 };
+    let keys = {};
 
-    // --- GENEL SİSTEM ---
+    // --- AKADEMİ VERİSİ ---
+    const academyData = {
+        "Matematik": {
+            "Türev": {
+                tips: ["Teğetin eğimi türevi verir.", "Maks/Min için türev alıp sıfıra eşitle.", "Bileşke fonksiyonda zincir kuralını unutma.", "Sabit sayının türevi 0'dır.", "Hız, yolun zamana göre türevidir."],
+                example: "f(x) = x² + 4x fonksiyonunun x=2'deki teğet eğimi nedir?",
+                solution: "f'(x) = 2x + 4. x=2 için f'(2) = 2(2)+4 = 8.",
+                logic: "Eğimi bulmak için önce genel türev kuralını uygula, sonra noktayı yerine yaz.",
+                test: [
+                    {q: "f(x)=5x ise f'(1) kaçtır?", a: ["0","1","5","x","10"], c: 2, sol: "5x'in türevi 5'tir, her noktada aynıdır."},
+                    {q: "x³ ün türevi nedir?", a: ["x²","3x²","3x³","x³+1","2x"], c: 1, sol: "Üs başa iner, derece 1 azalır."},
+                    {q: "Sabit f(x)=100 ise f'(5) kaçtır?", a: ["100","5","0","1","10"], c: 2, sol: "Sabitlerin türevi daima 0'dır."},
+                    {q: "Hangi noktada türev 0 ise o nokta ne olabilir?", a: ["Kesişim","Ekstremum","Başlangıç","Sonsuz","Asimptot"], c: 1, sol: "Yerel maks/min noktalarında teğet yataydır."},
+                    {q: "f(x)=sin(x) türevi nedir?", a: ["cos(x)","-sin(x)","1","tan(x)","-cos(x)"], c: 0, sol: "Sinüsün türevi kosinüstür."}
+                ]
+            },
+            "Logaritma": {
+                tips: ["Taban 1 olamaz.", "log(a*b) = log a + log b", "log(a/b) = log a - log b", "Üs başa çarpım olarak iner.", "ln, e tabanında logaritmadır."],
+                example: "log₂(8) kaçtır?",
+                solution: "2³ = 8 olduğu için cevap 3'tür.",
+                logic: "Tabanın kaçıncı kuvveti içerideki sayıyı veriyor sorusuna cevap ara.",
+                test: [
+                    {q: "log 10 kaçtır?", a: ["0","1","10","e","log"], c: 1, sol: "Taban yazmıyorsa 10'dur, log₁₀10=1."},
+                    {q: "log(1) her tabanda kaçtır?", a: ["1","10","0","e","Belirsiz"], c: 2, sol: "Her sayının 0. kuvveti 1'dir."},
+                    {q: "ln(e) kaçtır?", a: ["1","0","e","2","log"], c: 0, sol: "ln, e tabanındadır, logₑe=1."},
+                    {q: "log₂(x)=4 ise x kaçtır?", a: ["8","16","4","2","32"], c: 1, sol: "2⁴ = 16."},
+                    {q: "log(a)+log(b) neye eşittir?", a: ["log(a+b)","log(a*b)","log(a-b)","a+b","ab"], c: 1, sol: "Toplam, çarpım logaritmasına dönüşür."}
+                ]
+            }
+        },
+        "Türkçe": {
+            "Paragraf": {
+                tips: ["Önce soru kökünü oku.", "Ana düşünce genelde sondadır.", "Olumsuz soru köklerine (değinilmemiştir) dikkat.", "Metnin dışına çıkma.", "Bağlaçlar akışı değiştirir."],
+                example: "Bu parçada asıl anlatılmak istenen nedir?",
+                solution: "Genellikle parçanın sonuç cümlesinde saklıdır.",
+                logic: "Önce konuyu belirle, sonra yazarın bu konuya bakış açısını (ana fikir) bul.",
+                test: [
+                    {q: "Soru kökü 'çıkarılamaz' ise ne yapılmalı?", a: ["Hızlı oku","Şıkları ele","Sadece sona bak","Kendi yorumunu ekle","Girişe bak"], c: 1, sol: "Metne bağlı kalarak şıkları tek tek kontrol et."},
+                    {q: "Ana fikir metnin neresinde olur?", a: ["Giriş","Gelişme","Sonuç","Heryerde","Sadece başlıkta"], c: 2, sol: "Yazar genelde iletisini sonda verir."},
+                    {q: "Akışı bozan cümle ne demektir?", a: ["Yanlış yazılan","Konudan sapan","Çok uzun olan","Bağlacı olmayan","Soru işareti olan"], c: 1, sol: "Konunun dışına çıkan veya farklı yöne değinen cümledir."},
+                    {q: "Paragraf tamamlama neye göre yapılır?", a: ["Keyfe göre","Anlam akışına","Kelime sayısına","Noktalamaya","Yazara"], c: 1, sol: "Önceki ve sonraki cümlenin bağlamına bakılır."},
+                    {q: "Betimleme nedir?", a: ["Olay anlatma","Kelimeyle resim yapma","Tartışma","Kanıtlama","Öyküleme"], c: 1, sol: "Görsel öğelerin ağır bastığı anlatımdır."}
+                ]
+            }
+        }
+    };
+
+    // --- SİSTEM ---
     function showHome() { location.reload(); }
     function showGames() {
         document.getElementById('main-ui').classList.add('hidden');
-        document.getElementById('game-selector').style.display = 'flex';
+        document.getElementById('game-selector').style.display = 'block';
         selectGame('snake');
-    }
-    function toggleModal(id) {
-        const m = document.getElementById(id);
-        m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
-        if(id === 'study-modal') renderCourses();
     }
 
     function selectGame(game) {
         activeGame = game;
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById('btn-'+game).classList.add('active');
+        document.getElementById('game-wrapper').style.display = 'block';
         startGame();
     }
 
     function startGame() {
         clearInterval(gameLoop);
         score = 0;
-        document.getElementById('game-wrapper').style.display = 'block';
-        document.getElementById('game-over').style.display = 'none';
-        document.getElementById('leaderboard').style.display = (activeGame === 'snake') ? 'block' : 'none';
         if(activeGame === 'snake') initSnake();
         if(activeGame === 'tetris') initTetris();
         if(activeGame === 'pacman') initPacman();
     }
 
-    // --- SNAKE.IO (DÜZELTİLMİŞ MOUSE TAKİBİ) ---
-    let player, bots, foods;
+    // --- AKADEMİ MANTIĞI ---
+    function openAcademy() {
+        document.getElementById('academy-modal').style.display = 'flex';
+        renderCourses();
+    }
+    function closeModal() { document.getElementById('academy-modal').style.display = 'none'; }
+
+    function renderCourses() {
+        const content = document.getElementById('view-content');
+        content.innerHTML = '';
+        document.getElementById('view-title').innerText = "Ders Listesi";
+        document.getElementById('view-actions').innerHTML = '';
+        for(let c in academyData) {
+            let div = document.createElement('div');
+            div.className = 'item-card';
+            div.innerHTML = `<h3>${c}</h3>`;
+            div.onclick = () => renderSubjects(c);
+            content.appendChild(div);
+        }
+    }
+
+    function renderSubjects(course) {
+        const content = document.getElementById('view-content');
+        content.innerHTML = '';
+        document.getElementById('view-title').innerText = course + " Konuları";
+        for(let s in academyData[course]) {
+            let div = document.createElement('div');
+            div.className = 'item-card';
+            div.innerHTML = `<h4>${s}</h4>`;
+            div.onclick = () => renderDetail(course, s);
+            content.appendChild(div);
+        }
+        document.getElementById('view-actions').innerHTML = `<button class="nav-btn" onclick="renderCourses()">Geri Dön</button>`;
+    }
+
+    function renderDetail(course, subject) {
+        const data = academyData[course][subject];
+        const content = document.getElementById('view-content');
+        content.className = '';
+        content.innerHTML = `
+            <div class="study-section">
+                <h3>5 Kritik İpucu</h3>
+                ${data.tips.map(t => `<div class="tip-box"><i class="fas fa-check"></i> ${t}</div>`).join('')}
+            </div>
+            <div class="study-section" style="border-top: 2px solid var(--accent)">
+                <h3>Örnek Soru & Çözüm</h3>
+                <p><strong>Soru:</strong> ${data.example}</p>
+                <p class="correct"><strong>Çözüm:</strong> ${data.solution}</p>
+                <p><em><strong>Düşünme Yolu:</strong> ${data.logic}</em></p>
+            </div>
+            <div style="margin-top:20px; text-align:center;">
+                <button class="nav-btn" style="background:var(--green); color:black;" onclick="startTest('${course}','${subject}')">KONU TESTİNE BAŞLA (5 SORU)</button>
+            </div>
+        `;
+        document.getElementById('view-actions').innerHTML = `<button class="nav-btn" onclick="renderSubjects('${course}')">Konulara Dön</button>`;
+    }
+
+    let currentUserAnswers = [];
+    function startTest(course, subject) {
+        const data = academyData[course][subject];
+        const content = document.getElementById('view-content');
+        currentUserAnswers = new Array(5).fill(null);
+        content.innerHTML = data.test.map((q, i) => `
+            <div class="test-q">
+                <p><strong>Soru ${i+1}:</strong> ${q.q}</p>
+                ${q.a.map((opt, oi) => `
+                    <div class="opt" id="q${i}o${oi}" onclick="pickOpt(${i},${oi})">${String.fromCharCode(65+oi)}) ${opt}</div>
+                `).join('')}
+            </div>
+        `).join('');
+        document.getElementById('view-actions').innerHTML = `<button id="finish-btn" class="nav-btn hidden" style="background:var(--accent)" onclick="finishTest('${course}','${subject}')">Testi Bitir</button>`;
+    }
+
+    function pickOpt(qIdx, oIdx) {
+        currentUserAnswers[qIdx] = oIdx;
+        const opts = document.querySelectorAll(`[id^="q${qIdx}o"]`);
+        opts.forEach(o => o.classList.remove('selected'));
+        document.getElementById(`q${qIdx}o${oIdx}`).classList.add('selected');
+        
+        if(!currentUserAnswers.includes(null)) {
+            document.getElementById('finish-btn').classList.remove('hidden');
+        }
+    }
+
+    function finishTest(course, subject) {
+        const data = academyData[course][subject];
+        let correct = 0, wrong = 0, empty = 0;
+        const content = document.getElementById('view-content');
+        
+        let html = `<h3>Sonuçlar</h3>`;
+        data.test.forEach((q, i) => {
+            const userAns = currentUserAnswers[i];
+            const isCorrect = userAns === q.c;
+            if(isCorrect) correct++; else if(userAns === null) empty++; else wrong++;
+            
+            html += `
+                <div class="test-q" style="border: 1px solid ${isCorrect ? 'var(--green)' : 'var(--accent)'}">
+                    <p>Soru ${i+1}: ${isCorrect ? '✅ Doğru' : '❌ Yanlış'}</p>
+                    <p>Senin Şıkkın: ${userAns !== null ? String.fromCharCode(65+userAns) : 'Boş'}</p>
+                    <p class="correct">Doğru Cevap: ${String.fromCharCode(65+q.c)}</p>
+                    <p style="font-size:0.9rem; background:#000; padding:5px;"><strong>Çözüm:</strong> ${q.sol}</p>
+                </div>
+            `;
+        });
+        
+        const scoreVal = (correct * 20);
+        html = `<div style="text-align:center; font-size:1.5rem; margin-bottom:20px;">Puan: ${scoreVal} / 100 <br> ${correct}D ${wrong}Y ${empty}B</div>` + html;
+        content.innerHTML = html;
+        document.getElementById('view-actions').innerHTML = `<button class="nav-btn" onclick="renderDetail('${course}','${subject}')">Konuya Geri Dön</button>`;
+    }
+
+    // --- OYUNLAR (DÜZELTİLMİŞ) ---
+
+    // 1. SNAKE.IO (Mouse Düzeltildi)
+    let snPlayer, snBots, snFoods;
     function initSnake() {
         canvas.width = 800; canvas.height = 500;
-        player = { segments: [{x:400,y:250}], angle:0, size:20, speed:4, color:'#e94560' };
-        foods = Array.from({length:50}, () => ({x:Math.random()*800, y:Math.random()*500, c:`hsl(${Math.random()*360},70%,50%)`}));
-        bots = ["AI-Rex","CyberBot","Bot3000"].map(n => ({
-            name:n, segments:[{x:Math.random()*800,y:Math.random()*500}], angle:Math.random()*6, size:18, speed:2.5, color:'#555', alive:true
+        snPlayer = { segs: [{x:400,y:250}], angle:0, size:25, color: '#e94560' };
+        snFoods = Array.from({length:40}, () => ({x:Math.random()*780+10, y:Math.random()*480+10, c: '#00ff41'}));
+        snBots = ["Bot-1", "Bot-2"].map(n => ({
+            name: n, segs: [{x:Math.random()*800, y:Math.random()*500}], angle: Math.random()*6, size: 20, color: '#555', alive: true
         }));
         gameLoop = setInterval(updateSnake, 1000/60);
     }
@@ -126,157 +281,125 @@
     function updateSnake() {
         ctx.fillStyle = '#05050a'; ctx.fillRect(0,0,800,500);
         
-        // Gelişmiş Mouse Takibi
-        let dx = mouse.x - player.segments[0].x;
-        let dy = mouse.y - player.segments[0].y;
+        // MOUSE TAKİP DÜZELTME
+        let dx = mouse.x - snPlayer.segs[0].x;
+        let dy = mouse.y - snPlayer.segs[0].y;
         let targetAngle = Math.atan2(dy, dx);
-        
-        // Açı yumuşatma (Yılanın daha doğal dönmesini sağlar ama artık daha hızlı tepki verir)
-        let diff = targetAngle - player.angle;
-        while (diff < -Math.PI) diff += Math.PI * 2;
-        while (diff > Math.PI) diff -= Math.PI * 2;
-        player.angle += diff * 0.2; 
+        let diff = targetAngle - snPlayer.angle;
+        while(diff < -Math.PI) diff += Math.PI*2;
+        while(diff > Math.PI) diff -= Math.PI*2;
+        snPlayer.angle += diff * 0.12; // Yumuşak ama hızlı takip
 
         let head = { 
-            x: player.segments[0].x + Math.cos(player.angle) * player.speed, 
-            y: player.segments[0].y + Math.sin(player.angle) * player.speed 
+            x: snPlayer.segs[0].x + Math.cos(snPlayer.angle) * 3, 
+            y: snPlayer.segs[0].y + Math.sin(snPlayer.angle) * 3 
         };
 
-        if(head.x<0||head.x>800||head.y<0||head.y>500) return die("Sınırı aştın!");
-        player.segments.unshift(head);
-        if(player.segments.length > player.size) player.segments.pop();
+        if(head.x<0||head.x>800||head.y<0||head.y>500) return die("Kenara çarptın!");
+        snPlayer.segs.unshift(head);
+        if(snPlayer.segs.length > snPlayer.size) snPlayer.segs.pop();
 
-        // Botlar ve Yemekler (Aynı mantık)
-        bots.forEach(b => {
-            if(!b.alive) return;
-            b.angle += (Math.random()-0.5)*0.2;
-            let bh = { x: b.segments[0].x + Math.cos(b.angle)*b.speed, y: b.segments[0].y + Math.sin(b.angle)*b.speed };
-            if(bh.x<10||bh.x>790||bh.y<10||bh.y>490) b.angle += Math.PI;
-            b.segments.unshift(bh); if(b.segments.length > b.size) b.segments.pop();
-            ctx.fillStyle = b.color; b.segments.forEach(s => ctx.fillRect(s.x, s.y, 8, 8));
-        });
-
-        foods.forEach((f,i) => {
-            ctx.fillStyle = f.c; ctx.beginPath(); ctx.arc(f.x,f.y,4,0,Math.PI*2); ctx.fill();
-            if(Math.hypot(player.segments[0].x-f.x, player.segments[0].y-f.y)<15) {
-                player.size+=2; score+=10; foods[i]={x:Math.random()*800, y:Math.random()*500, c:f.c};
+        // Çizim & Botlar
+        snFoods.forEach((f,i) => {
+            ctx.fillStyle = f.c; ctx.beginPath(); ctx.arc(f.x,f.y,5,0,7); ctx.fill();
+            if(Math.hypot(head.x-f.x, head.y-f.y) < 15) { 
+                snPlayer.size += 5; score += 10; snFoods[i] = {x:Math.random()*780,y:Math.random()*480,c:f.c}; 
             }
         });
 
-        ctx.fillStyle = player.color; player.segments.forEach(s => ctx.fillRect(s.x,s.y,10,10));
-        updateLB();
+        ctx.fillStyle = snPlayer.color;
+        snPlayer.segs.forEach((s, i) => {
+            ctx.beginPath(); ctx.arc(s.x, s.y, i===0?10:7, 0, 7); ctx.fill();
+        });
     }
 
-    function updateLB() {
-        let list = [{n:"SEN", s:score}].concat(bots.filter(b=>b.alive).map(b=>({n:b.name, s:b.size*5}))).sort((a,b)=>b.s-a.s);
-        document.getElementById('lb-list').innerHTML = list.slice(0,5).map(x=>`<div class="lb-row"><span>${x.n}</span><span>${x.s}</span></div>`).join('');
-    }
-
-    // --- TETRIS (STABİL) ---
-    let board, piece, tetrominoes = {'I': [[1,1,1,1]], 'O': [[1,1],[1,1]], 'T': [[0,1,0],[1,1,1]], 'S': [[0,1,1],[1,1,0]], 'Z': [[1,1,0],[0,1,1]], 'J': [[1,0,0],[1,1,1]], 'L': [[0,0,1],[1,1,1]]};
-    function initTetris() {
-        canvas.width = 300; canvas.height = 500;
-        ctx.setTransform(1,0,0,1,0,0); ctx.scale(25,25);
-        board = Array.from({length: 20}, () => Array(12).fill(0));
-        piece = { pos: {x: 4, y: 0}, matrix: tetrominoes['T'] };
-        gameLoop = setInterval(() => { piece.pos.y++; if(collide()){piece.pos.y--; merge(); piece={pos:{x:4,y:0}, matrix:tetrominoes['IJLOSTZ'[Math.floor(Math.random()*7)]]}; if(collide()) die("Kule doldu!");} drawTetris(); }, 400);
-    }
-    function collide() { return piece.matrix.some((row, y) => row.some((v, x) => v !== 0 && (board[y + piece.pos.y] && board[y + piece.pos.y][x + piece.pos.x]) !== 0)); }
-    function merge() { piece.matrix.forEach((row, y) => row.forEach((v, x) => { if(v) board[y+piece.pos.y][x+piece.pos.x]=1; })); board.forEach((row, y) => { if(row.every(v=>v!==0)) { board.splice(y,1); board.unshift(Array(12).fill(0)); score+=100; }}); }
-    function drawTetris() { ctx.fillStyle='#000'; ctx.fillRect(0,0,12,20); board.forEach((row,y)=>row.forEach((v,x)=>{if(v){ctx.fillStyle='blue'; ctx.fillRect(x,y,1,1);}})); piece.matrix.forEach((row,y)=>row.forEach((v,x)=>{if(v){ctx.fillStyle='red'; ctx.fillRect(x+piece.pos.x,y+piece.pos.y,1,1);}})); }
-
-    // --- PACMAN (GERÇEK LABİRENTLİ) ---
-    let pac, ghosts, dots, walls;
+    // 2. PACMAN (Gerçek Map)
+    let pcMap = [
+        [1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,1,0,0,0,0,1],
+        [1,0,1,0,1,0,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,0,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1]
+    ];
+    let pcPlayer, pcDots;
     function initPacman() {
-        canvas.width = 440; canvas.height = 440;
-        pac = { x: 220, y: 330, dir: {x:0, y:0}, size: 12 };
-        // Gerçekçi duvar yapısı
-        walls = [
-            {x:0,y:0,w:440,h:20}, {x:0,y:420,w:440,h:20}, {x:0,y:0,w:20,h:440}, {x:420,y:0,w:20,h:440},
-            {x:60,y:60,w:100,h:40}, {x:280,y:60,w:100,h:40}, {x:60,y:140,w:100,h:20}, {x:280,y:140,w:100,h:20},
-            {x:200,y:20,w:40,h:80}, {x:140,y:200,w:160,h:20}, {x:210,y:220,w:20,h:80},
-            {x:60,y:280,w:60,h:80}, {x:320,y:280,w:60,h:80}
-        ];
-        dots = [];
-        for(let i=0; i<50; i++) {
-            let d = {x: Math.random()*380+30, y: Math.random()*380+30};
-            if(!walls.some(w => d.x > w.x-5 && d.x < w.x+w.w+5 && d.y > w.y-5 && d.y < w.y+w.h+5)) dots.push(d);
-        }
-        ghosts = [{x: 220, y: 150, c: 'red', dx:2, dy:0}, {x: 50, y: 50, c: 'pink', dx:0, dy:2}];
+        canvas.width = 500; canvas.height = 350;
+        pcPlayer = { x: 50, y: 50, dir: {x:0, y:0} };
+        pcDots = [];
+        pcMap.forEach((row, y) => row.forEach((v, x) => {
+            if(v === 0) pcDots.push({x: x*50+25, y: y*50+25});
+        }));
         gameLoop = setInterval(updatePacman, 1000/60);
     }
 
     function updatePacman() {
-        ctx.fillStyle = '#000'; ctx.fillRect(0,0,440,440);
+        ctx.fillStyle = '#000'; ctx.fillRect(0,0,500,350);
         
-        // Duvarları çiz
-        ctx.fillStyle = '#2222ff';
-        walls.forEach(w => ctx.fillRect(w.x, w.y, w.w, w.h));
+        // Map Çizim
+        pcMap.forEach((row, y) => row.forEach((v, x) => {
+            if(v === 1) { ctx.fillStyle = 'blue'; ctx.fillRect(x*50, y*50, 48, 48); }
+        }));
 
-        // Pacman Hareket ve Çarpışma
-        let nextX = pac.x + pac.dir.x * 2.5;
-        let nextY = pac.y + pac.dir.y * 2.5;
-        
-        let hit = walls.some(w => nextX+10 > w.x && nextX-10 < w.x+w.w && nextY+10 > w.y && nextY-10 < w.y+w.h);
-        if(!hit) { pac.x = nextX; pac.y = nextY; }
+        // Hareket & Çarpma
+        let nx = pcPlayer.x + pcPlayer.dir.x * 2;
+        let ny = pcPlayer.y + pcPlayer.dir.y * 2;
+        let gridX = Math.floor(nx / 50);
+        let gridY = Math.floor(ny / 50);
 
-        dots = dots.filter(d => {
-            ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(d.x, d.y, 2, 0, Math.PI*2); ctx.fill();
-            if(Math.hypot(pac.x-d.x, pac.y-d.y) < 12) { score+=10; return false; }
+        if(pcMap[gridY] && pcMap[gridY][gridX] !== 1) {
+            pcPlayer.x = nx; pcPlayer.y = ny;
+        }
+
+        pcDots = pcDots.filter(d => {
+            ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(d.x, d.y, 3, 0, 7); ctx.fill();
+            if(Math.hypot(pcPlayer.x-d.x, pcPlayer.y-d.y) < 15) { score += 10; return false; }
             return true;
         });
 
-        ghosts.forEach(g => {
-            let gx = g.x + g.dx; let gy = g.y + g.dy;
-            if(walls.some(w => gx+10 > w.x && gx-10 < w.x+w.w && gy+10 > w.y && gy-10 < w.y+w.h)) {
-                g.dx *= -1; g.dy *= -1; // Duvara çarpan hayalet geri döner
-            } else { g.x = gx; g.y = gy; }
-            
-            ctx.fillStyle = g.c; ctx.beginPath(); ctx.arc(g.x, g.y, 12, 0, Math.PI, true); ctx.fill();
-            if(Math.hypot(pac.x-g.x, pac.y-g.y) < 20) die("Yakalalandın!");
-        });
-
-        ctx.fillStyle = 'yellow'; ctx.beginPath(); ctx.arc(pac.x, pac.y, 14, 0.2*Math.PI, 1.8*Math.PI); ctx.lineTo(pac.x, pac.y); ctx.fill();
+        ctx.fillStyle = 'yellow'; ctx.beginPath(); ctx.arc(pcPlayer.x, pcPlayer.y, 15, 0.2*Math.PI, 1.8*Math.PI); ctx.lineTo(pcPlayer.x, pcPlayer.y); ctx.fill();
+        if(pcDots.length === 0) die("Tebrikler Kazandın!");
     }
 
-    function die(r) { clearInterval(gameLoop); document.getElementById('death-reason').innerText = r; document.getElementById('game-over').style.display = 'flex'; }
-
-    // --- KONTROLLER ---
-    window.addEventListener('keydown', e => {
-        if(activeGame === 'pacman') {
-            if(e.key === 'ArrowLeft') pac.dir = {x:-1, y:0};
-            if(e.key === 'ArrowRight') pac.dir = {x:1, y:0};
-            if(e.key === 'ArrowUp') pac.dir = {x:0, y:-1};
-            if(e.key === 'ArrowDown') pac.dir = {x:0, y:1};
+    // 3. TETRIS
+    let trBoard, trPiece;
+    function initTetris() {
+        canvas.width = 300; canvas.height = 500;
+        ctx.setTransform(1,0,0,1,0,0); ctx.scale(25, 25);
+        trBoard = Array.from({length: 20}, () => Array(12).fill(0));
+        trPiece = { pos: {x: 4, y: 0}, m: [[1,1,1,1]] };
+        gameLoop = setInterval(updateTetris, 500);
+    }
+    function updateTetris() {
+        trPiece.pos.y++;
+        if(collideTr()) {
+            trPiece.pos.y--;
+            trPiece.m.forEach((r,y) => r.forEach((v,x) => { if(v) trBoard[y+trPiece.pos.y][x+trPiece.pos.x] = 1; }));
+            trPiece = { pos: {x: 4, y: 0}, m: [[1,1],[1,1]] };
         }
-        if(activeGame === 'tetris') {
-            if(e.key === 'ArrowLeft') { piece.pos.x--; if(collide()) piece.pos.x++; }
-            if(e.key === 'ArrowRight') { piece.pos.x++; if(collide()) piece.pos.x--; }
-            if(e.key === 'ArrowUp') { 
-                let old = piece.matrix; piece.matrix = piece.matrix[0].map((_, i) => piece.matrix.map(row => row[i]).reverse());
-                if(collide()) piece.matrix = old;
-            }
-        }
-    });
+        ctx.fillStyle = '#000'; ctx.fillRect(0,0,12,20);
+        trBoard.forEach((r,y) => r.forEach((v,x) => { if(v) { ctx.fillStyle='blue'; ctx.fillRect(x,y,1,1); }}));
+        ctx.fillStyle = 'red'; trPiece.m.forEach((r,y) => r.forEach((v,x) => { if(v) ctx.fillRect(x+trPiece.pos.x, y+trPiece.pos.y, 1, 1); }));
+    }
+    function collideTr() {
+        return trPiece.m.some((r,y) => r.some((v,x) => v && (trBoard[y+trPiece.pos.y] === undefined || trBoard[y+trPiece.pos.y][x+trPiece.pos.x] !== 0)));
+    }
 
-    canvas.addEventListener('mousemove', e => {
+    function die(m) { clearInterval(gameLoop); alert(m + " Skor: " + score); showHome(); }
+
+    window.addEventListener('mousemove', e => {
         const r = canvas.getBoundingClientRect();
         mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
     });
-
-    // DERS SİSTEMİ (v2.1'den miras)
-    const studyData = { "Matematik": [{t: "Limit", d: "Belirsizlik durumlarında çarpanlara ayır veya L'hopital kullan."}, {t: "Türev", d: "Eğim her şeydir."}, {t: "Polinom", d: "P(x) sorularında kökleri iyi analiz et."}], "Türkçe": [{t: "Paragraf", d: "Altı çizili söze dikkat!"}] };
-    function renderCourses() {
-        document.getElementById('study-title').innerText = "Ders Seç";
-        let html = ''; for(let c in studyData) html += `<div class="course-btn" onclick="renderSubjects('${c}')">${c}</div>`;
-        document.getElementById('course-list').innerHTML = html;
-        document.getElementById('course-list').classList.remove('hidden');
-    }
-    function renderSubjects(c) {
-        let html = ''; studyData[c].forEach(i => html += `<div class="subject-detail"><strong>${i.t}</strong><p>${i.d}</p></div>`);
-        document.getElementById('study-body').innerHTML = `<div id="course-list" class="course-list"></div>` + html;
-        document.getElementById('back-btn').classList.remove('hidden');
-    }
+    window.addEventListener('keydown', e => {
+        if(activeGame === 'pacman') {
+            if(e.key === 'ArrowLeft') pcPlayer.dir = {x:-1, y:0};
+            if(e.key === 'ArrowRight') pcPlayer.dir = {x:1, y:0};
+            if(e.key === 'ArrowUp') pcPlayer.dir = {x:0, y:-1};
+            if(e.key === 'ArrowDown') pcPlayer.dir = {x:0, y:1};
+        }
+    });
 </script>
 </body>
 </html>
