@@ -3,24 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benim Dünyam | v1.9.0</title>
+    <title>Benim Dünyam | v2.0.0 - YKS Hazırlık</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --dark: #0a0a12; --blue: #16213e; --accent: #e94560; --green: #00ff41; --text: #e2e2e2; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--dark); color: var(--text); overflow: hidden; }
         
-        /* HEADER */
         header { background: #1a1a2e; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); }
         .version-group { display: flex; align-items: center; background: var(--accent); padding: 5px 15px; border-radius: 15px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .version-group:hover { transform: scale(1.05); }
 
-        /* NAV & CONTAINERS */
-        .container { display: flex; flex-direction: column; align-items: center; min-height: 80vh; padding-top: 50px; }
+        .container { display: flex; flex-direction: column; align-items: center; min-height: 80vh; padding-top: 50px; overflow-y: auto; }
         .game-nav { display: none; justify-content: center; gap: 10px; background: #16213e; padding: 15px; width: 100%; }
-        .nav-btn { background: transparent; border: 1px solid var(--accent); color: white; padding: 8px 20px; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        .nav-btn { background: transparent; border: 1px solid var(--accent); color: white; padding: 8px 20px; cursor: pointer; border-radius: 5px; font-weight: bold; margin-bottom: 5px; }
         .nav-btn.active { background: var(--accent); }
 
-        /* ANA MENÜ BUTONLARI */
         .main-menu { display: flex; gap: 25px; }
         .menu-card { 
             width: 180px; height: 180px; background: #1a1a2e; border: 2px solid #333; 
@@ -30,21 +26,26 @@
         .menu-card:hover { border-color: var(--accent); transform: translateY(-10px); box-shadow: 0 10px 20px rgba(233, 69, 96, 0.2); }
         .menu-card i { font-size: 3rem; margin-bottom: 15px; color: var(--accent); }
 
-        /* OYUN ALANI */
         #game-wrapper { display: none; position: relative; }
         canvas { background: #000; border: 3px solid #222; border-radius: 10px; cursor: crosshair; }
         #leaderboard { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.8); padding: 10px; border: 1px solid var(--accent); border-radius: 5px; min-width: 130px; font-family: monospace; }
         .lb-row { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 3px; }
         .me { color: gold; font-weight: bold; }
 
-        /* MODALS */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background: #1a1a2e; padding: 30px; border-radius: 15px; border: 2px solid var(--accent); width: 450px; position: relative; }
-        .close-modal { position: absolute; top: 10px; right: 15px; cursor: pointer; font-size: 1.5rem; }
-        
-        textarea { width: 100%; height: 100px; background: #000; color: white; border: 1px solid var(--accent); padding: 10px; margin: 10px 0; border-radius: 5px; }
-        .note-item { background: #000; padding: 10px; margin-bottom: 10px; border-left: 3px solid var(--accent); border-radius: 4px; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: #1a1a2e; padding: 30px; border-radius: 15px; border: 2px solid var(--accent); width: 80%; max-width: 800px; max-height: 85vh; overflow-y: auto; position: relative; }
+        .close-modal { position: absolute; top: 15px; right: 20px; cursor: pointer; font-size: 2rem; color: var(--accent); }
 
+        /* DERS NOTLARI OZEL STIL */
+        .lesson-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 20px; }
+        .lesson-card { background: #16213e; padding: 20px; border-radius: 10px; text-align: center; cursor: pointer; border: 1px solid #333; transition: 0.2s; }
+        .lesson-card:hover { border-color: var(--accent); background: #1f2b4a; }
+        .subject-list { display: none; margin-top: 20px; }
+        .subject-item { background: #0a0a12; padding: 12px; margin-bottom: 8px; border-radius: 5px; cursor: pointer; border-left: 4px solid var(--accent); transition: 0.2s; }
+        .subject-item:hover { background: #222; padding-left: 20px; }
+        .info-box { display: none; background: #000; border: 1px solid var(--green); padding: 20px; margin-top: 20px; border-radius: 10px; color: #fff; line-height: 1.6; }
+        .info-box h4 { color: var(--green); margin-top: 0; }
+        
         #hint { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: gold; font-weight: bold; animation: blink 1s infinite; pointer-events: none; }
         @keyframes blink { 50% { opacity: 0; } }
         .hidden { display: none !important; }
@@ -53,9 +54,9 @@
 <body>
 
 <header>
-    <div onclick="showHome()" style="cursor:pointer; font-weight: bold; font-size: 1.2rem;"><i class="fas fa-dragon"></i> DİJİTAL DÜNYA</div>
+    <div onclick="showHome()" style="cursor:pointer; font-weight: bold; font-size: 1.2rem;"><i class="fas fa-university"></i> AKADEMİK DÜNYA</div>
     <div class="version-group" onclick="toggleModal('version-modal')">
-        <span>v1.9.0</span> <i class="fas fa-info-circle" style="margin-left:8px;"></i>
+        <span>v2.0.0</span> <i class="fas fa-info-circle" style="margin-left:8px;"></i>
     </div>
 </header>
 
@@ -66,74 +67,170 @@
 </div>
 
 <div class="container">
-    <!-- ANA GİRİŞ -->
     <div id="main-ui" class="main-menu">
         <div class="menu-card" onclick="showGames()"><i class="fas fa-gamepad"></i><span>OYUNLAR</span></div>
-        <div class="menu-card" onclick="toggleModal('notes-modal')"><i class="fas fa-book"></i><span>GÜNLÜK</span></div>
-        <div class="menu-card" onclick="alert('Yakında!')"><i class="fas fa-film"></i><span>FİLMLER</span></div>
+        <div class="menu-card" onclick="toggleModal('lessons-modal')"><i class="fas fa-graduation-cap"></i><span>DERS NOTLARI</span></div>
+        <div class="menu-card" onclick="alert('Yakında!')"><i class="fas fa-film"></i><span>VİDEOLAR</span></div>
     </div>
 
-    <!-- OYUN ALANI -->
     <div id="game-wrapper">
-        <div id="leaderboard">
-            <div style="text-align:center; color:var(--accent); font-size: 0.8rem; margin-bottom: 5px;">TOP 5</div>
-            <div id="lb-list"></div>
-        </div>
+        <div id="leaderboard"><div id="lb-list"></div></div>
         <canvas id="gameCanvas"></canvas>
         <div id="hint" class="hidden">HAREKET ET VE BAŞLA!</div>
-        
         <div id="game-over" class="modal" style="position: absolute;">
             <div class="modal-content" style="text-align:center;">
-                <h1 style="color:var(--accent); margin:0;">ELENDİN!</h1>
-                <p id="death-reason" style="color:#888; margin:15px 0;"></p>
-                <button class="nav-btn" style="background:var(--accent)" onclick="startGame()">TEKRAR DENE</button>
-                <button class="nav-btn" style="margin-left:10px;" onclick="showHome()">MENÜ</button>
+                <h1 style="color:var(--accent)">ELENDİN!</h1>
+                <button class="nav-btn" onclick="startGame()">TEKRAR DENE</button>
             </div>
         </div>
     </div>
-    
-    <div id="stat-bar" class="hidden" style="margin-top: 20px; font-family: monospace; color: var(--green);">
-        DÜNYA: <span id="stat-w">1</span>-<span id="stat-l">1</span> | SKOR: <span id="stat-s">0</span>
-    </div>
 </div>
 
-<!-- VERSİYON GEÇMİŞİ MODAL -->
-<div id="version-modal" class="modal">
+<div id="lessons-modal" class="modal">
     <div class="modal-content">
-        <span class="close-modal" onclick="toggleModal('version-modal')">&times;</span>
-        <h3 style="color:var(--accent)">Güncelleme Geçmişi</h3>
-        <div style="max-height: 300px; overflow-y: auto; font-size: 0.9rem;">
-            <p><strong>v1.9.0:</strong> Ana menü yapısı geri geldi. Not defteri ve Leaderboard eklendi.</p>
-            <p><strong>v1.8.0:</strong> Sinek çarpışma sistemi (kendi gövdesinden geçme) OE oldu.</p>
-            <p><strong>v1.7.0:</strong> Mouse takip sistemi ve Turbo (Boost) eklendi.</p>
+        <span class="close-modal" onclick="closeLessons()">&times;</span>
+        <h2 id="modal-title" style="color:var(--accent)"><i class="fas fa-book-open"></i> YKS Ders Çalışma Alanı</h2>
+        
+        <div id="lesson-selector" class="lesson-grid">
+            <div class="lesson-card" onclick="showSubjects('Matematik')"><i class="fas fa-calculator"></i><br>Matematik</div>
+            <div class="lesson-card" onclick="showSubjects('Türkçe')"><i class="fas fa-pen-nib"></i><br>Türkçe</div>
+            <div class="lesson-card" onclick="showSubjects('Fizik')"><i class="fas fa-atom"></i><br>Fizik</div>
+            <div class="lesson-card" onclick="showSubjects('Biyoloji')"><i class="fas fa-dna"></i><br>Biyoloji</div>
+            <div class="lesson-card" onclick="showSubjects('Tarih')"><i class="fas fa-history"></i><br>Tarih</div>
+            <div class="lesson-card" onclick="showSubjects('Kimya')"><i class="fas fa-flask"></i><br>Kimya</div>
+        </div>
+
+        <div id="subject-area" class="subject-list">
+            <button class="nav-btn" onclick="backToLessons()"><i class="fas fa-arrow-left"></i> Geri Dön</button>
+            <div id="subject-container"></div>
+        </div>
+
+        <div id="info-box" class="info-box">
+            <h4 id="info-title">Konu Detayı</h4>
+            <div id="info-content"></div>
         </div>
     </div>
 </div>
 
-<!-- GÜNLÜK MODAL -->
-<div id="notes-modal" class="modal">
+<div id="version-modal" class="modal">
     <div class="modal-content">
-        <span class="close-modal" onclick="toggleModal('notes-modal')">&times;</span>
-        <h3 style="color:var(--accent)">Dijital Günlük</h3>
-        <textarea id="note-input" placeholder="Bugün neler oldu?"></textarea>
-        <button class="nav-btn" style="width:100%;" onclick="saveNote()">KAYDET</button>
-        <div id="note-list" style="margin-top: 15px; max-height: 200px; overflow-y: auto;"></div>
+        <span class="close-modal" onclick="toggleModal('version-modal')">&times;</span>
+        <h3 style="color:var(--accent)">v2.0.0 Güncellemesi</h3>
+        <p>• Günlük sistemi "Ders Notları" olarak değiştirildi.</p>
+        <p>• YKS odaklı Matematik, Fizik, Türkçe içerikleri eklendi.</p>
+        <p>• Konu takip ve strateji sistemi entegre edildi.</p>
     </div>
 </div>
 
 <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-    let activeGame = 'snake', gameLoop, isStarted = false, score = 0;
+    let activeGame = 'snake', gameLoop, score = 0;
     let mouse = { x: 450, y: 275, down: false };
-    let keys = {};
 
-    let stats = JSON.parse(localStorage.getItem('dw_v190')) || { 
-        snake: {w:1, l:1}, tetris: {w:1, l:1}, pacman: {w:1, l:1}, notes: [] 
+    // DERS VE KONU VERİLERİ
+    const yksData = {
+        "Matematik": [
+            {t: "Temel Kavramlar", d: "Sayı kümelerini karıştırma. Özellikle (Z) ve (N) ayrımına dikkat! Her sene 1-2 soru kesin gelir."},
+            {t: "Üslü ve Köklü Sayılar", d: "Kök dışına çıkarma kurallarını adın gibi bil. Üslü sayılarda toplama yaparken ortak paranteze almayı unutma."},
+            {t: "Problemler", d: "Sınavın %40'ı burası! Denklem kurma hızını artır. Her gün düzenli 20 problem çözmek şart."},
+            {t: "Fonksiyonlar", d: "Ters fonksiyon ve bileşke fonksiyon kuralları AYT'nin de temelidir. Grafik okumayı öğren."},
+            {t: "Polinomlar", d: "Kalan bulma sorularında P(x)'i sıfıra eşitleme mantığını oturt. Derece sorularına dikkat."},
+            {t: "Trigonometri", d: "Birim çember her şeydir! Formül ezberlemek yerine çember üzerindeki yerini öğren."},
+            {t: "Logaritma", d: "Özellikleri iyi bil, taban değiştirme kuralı en çok çıkan kısımdır. Tanım aralığını unutma."},
+            {t: "Limit ve Süreklilik", d: "Belirsizlik durumlarında sadeleştirme yapmayı unutma. Grafik üzerinden süreklilik bakmayı öğren."},
+            {t: "Türev", d: "Geometrik yorum (teğet eğimi) sınavın favorisidir. Max-Min problemlerinde denklem kurmak en önemli adımdır."},
+            {t: "İntegral", d: "Değişken değiştirme yöntemini (u-du) her türlü soru tipinde pratik yap. Alan soruları kaçmaz!"}
+        ],
+        "Türkçe": [
+            {t: "Paragrafta Anlam", d: "Ana düşünce sorularında son cümlelere odaklan. Olumsuz soru köklerine (değinilmemiştir vb.) dikkat!"},
+            {t: "Yazım Kuralları", d: "Büyük harflerin kullanımı ve 'de/da, ki' ayrımı her yıl sorulur. TDK güncellemelerini takip et."},
+            {t: "Noktalama İşaretleri", d: "Virgülün kullanılmadığı yerlere odaklan. İki nokta ve noktalı virgül farkı kritiktir."},
+            {t: "Sözcükte Yapı", d: "İyelik ekleri ile hal eklerini karıştırma. Yapım eki alan sözcüğün gövde olduğunu unutma."},
+            {t: "Cümlenin Ögeleri", d: "Önce Yüklem sonra Özne bulunur. Tamlamaları ve deyimleri asla ayırma!"},
+            {t: "Ses Bilgisi", d: "Ünlü düşmesi ve ünsüz benzeşmesi en çok çıkanlardır. 'Fıstıkçı Şahap' kuralını hatırla."},
+            {t: "Anlatım Bozuklukları", d: "Özne-yüklem uyumsuzluğu ve gereksiz sözcük kullanımı en yaygın hatalardır."},
+            {t: "Sözcük Türleri", d: "Zarf ve Sıfat farkına dikkat. Sıfat ismi, Zarf fiili niteler."}
+        ],
+        "Fizik": [
+            {t: "Vektörler ve Kuvvet", d: "Bileşke kuvvet bulurken açılara dikkat et. Sinüs ve Kosinüs bileşenlerini doğru ayır."},
+            {t: "Optik", d: "Kırılma yasaları ve tam yansıma olayını günlük hayat örnekleriyle öğren. Renk karışımları favoridir."},
+            {t: "Elektrik", d: "V=i.R formülü hayat kurtarır. Seri ve paralel bağlamada potansiyel farkları iyi analiz et."},
+            {t: "Hareket ve Kuvvet", d: "Hız-zaman grafiğinin altındaki alan yer değiştirmeyi verir. Newton yasalarını unutma."},
+            {t: "İş, Güç ve Enerji", d: "Enerji asla yok olmaz, dönüşür. Sürtünmeli yüzeylerde ısıya dönüşen enerjiye dikkat."},
+            {t: "Madde ve Özellikleri", d: "Dayanıklılık, adezyon ve kohezyon kavramlarını karıştırma. Özkütle hesaplamaları temeldir."},
+            {t: "Dalgalar", d: "Boyuna ve enine dalga farklarını bil. Ses dalgalarında frekans-yükseklik ilişkisi sorulur."},
+            {t: "Termodinamik", d: "Isı ve sıcaklık farklı kavramlardır. Isı alışverişinde denge sıcaklığı hesaplamalarına bak."}
+        ],
+        "Biyoloji": [
+            {t: "Hücre ve Yapısı", d: "Organellerin görevlerini eşleştirme soruları gelir. Mitokondri ve Kloroplast farkı çok önemli."},
+            {t: "Kalıtım", d: "Punnett karesi yapmayı öğren. Kan grupları ve X'e bağlı kalıtım sorularına hazırlıklı ol."},
+            {t: "Ekoloji", d: "Besin piramidinde yukarı çıkıldığında biyokütle azalır, zehir miktarı artar. Unutma!"},
+            {t: "Sistemler", d: "Sindirim ve Sinir sistemi en detaylı olanlardır. Hormonların feedback mekanizmasına çalış."},
+            {t: "Canlıların Sınıflandırılması", d: "Türden Aleme gidildikçe benzerlik azalır, çeşitlilik artır. Protein benzerliği kritiktir."},
+            {t: "Nükleik Asitler", d: "DNA eşlenmesi (Replikasyon) basamaklarını sırayla bil. ATP yapısındaki bağlara dikkat."},
+            {t: "Bitki Biyolojisi", d: "Fotosentez ve solunum denklemlerini ezberle. Bitkisel dokular (Ksilem-Floem) çok sorulur."},
+            {t: "Enzimler", d: "Enzimlerin çalışma hızını etkileyen faktörler (Sıcaklık, pH, Substrat) her zaman potansiyel sorudur."}
+        ],
+        "Tarih": [
+            {t: "Tarih Bilimi", d: "Kaynak türlerini (birinci el, ikinci el) bil. Takvim sistemleri (Hicri-Miladi) farkına bak."},
+            {t: "İlk Türk Devletleri", d: "Kut anlayışı ve Veraset sistemi Türk devletlerinin neden çabuk yıkıldığını açıklar."},
+            {t: "İslam Tarihi", d: "Dört Halife dönemi gelişmelerini ve Abbasilerin hoşgörü politikasını öğren."},
+            {t: "Osmanlı Kuruluş", d: "İskan ve İstimalet politikaları Balkanlar'da kalıcılığı sağlamıştır. Padişahların lakapları önemli."},
+            {t: "Kurtuluş Savaşı", d: "Genelgeler ve Kongreler dönemi sınavın kalbidir. Amasya-Erzurum-Sivas sıralamasını bil."},
+            {t: "İnkılap Tarihi", d: "Atatürk ilkelerini (Laiklik, Devletçilik vb.) anahtar kelimelerle kodla."},
+            {t: "I. Dünya Savaşı", d: "Cepheler (Kafkas, Çanakkale, Hicaz-Yemen) ve gizli antlaşmalar detaydır ama sorulur."},
+            {t: "Milli Mücadele Muharebeler", d: "Lozan Antlaşması'nın maddelerini ve günümüze etkilerini iyi analiz et."}
+        ],
+        "Kimya": [
+            {t: "Kimya Bilimi", d: "Laboratuvar güvenlik sembollerini ve temel elementlerin sembollerini (ilk 20) mutlaka ezberle."},
+            {t: "Atom ve Yapısı", d: "İzotop, İzoton, İzobar ve İzoelektronik kavramlarını birbiriyle karıştırma."},
+            {t: "Periyodik Sistem", d: "Soldan sağa ve yukarıdan aşağıya değişen özellikleri (Elektronegatiflik vb.) kodla."},
+            {t: "Kimyasal Türler Arası Etkileşim", d: "Güçlü etkileşimler (İyonik, Kovalent) ve zayıf etkileşimler (Hidrojen bağı) farkına bak."},
+            {t: "Maddenin Halleri", d: "Viskozite ve buhar basıncı etkileyen faktörler AYT Kimya için de çok önemlidir."},
+            {t: "Mol Kavramı", d: "Avogadro sayısı üzerinden orantı kurmayı öğren. Karmaşık hesaplamalarda sakin kal."},
+            {t: "Asitler ve Bazlar", d: "pH ölçeği ve indikatör renk değişimlerini bil. Nötrleşme tepkimeleri temeldir."},
+            {t: "Karışımlar", d: "Çözünürlük hesaplamaları ve derişim birimleri (Molarite) en çok soru gelen kısımdır."}
+        ]
     };
 
-    function showHome() { location.reload(); }
+    function showSubjects(lesson) {
+        document.getElementById('lesson-selector').classList.add('hidden');
+        document.getElementById('subject-area').style.display = 'block';
+        document.getElementById('modal-title').innerText = lesson + " Konuları";
+        
+        const container = document.getElementById('subject-container');
+        container.innerHTML = "";
+        yksData[lesson].forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'subject-item';
+            div.innerText = item.t;
+            div.onclick = () => showInfo(item.t, item.d);
+            container.appendChild(div);
+        });
+    }
 
+    function showInfo(title, detail) {
+        document.getElementById('info-box').style.display = 'block';
+        document.getElementById('info-title').innerText = title;
+        document.getElementById('info-content').innerHTML = `<strong>Taktik:</strong> ${detail}<br><br><small style="color:var(--accent)">* Bu konu YKS'de sıkça sorulmaktadır.</small>`;
+        document.getElementById('info-box').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function backToLessons() {
+        document.getElementById('lesson-selector').classList.remove('hidden');
+        document.getElementById('subject-area').style.display = 'none';
+        document.getElementById('info-box').style.display = 'none';
+        document.getElementById('modal-title').innerHTML = '<i class="fas fa-book-open"></i> YKS Ders Çalışma Alanı';
+    }
+
+    function closeLessons() {
+        toggleModal('lessons-modal');
+        backToLessons();
+    }
+
+    // --- TEMEL FONKSİYONLAR ---
+    function showHome() { location.reload(); }
     function showGames() {
         document.getElementById('main-ui').classList.add('hidden');
         document.getElementById('game-selector').style.display = 'flex';
@@ -143,7 +240,6 @@
     function toggleModal(id) {
         const m = document.getElementById(id);
         m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
-        if(id === 'notes-modal') renderNotes();
     }
 
     function selectGame(game) {
@@ -155,119 +251,51 @@
 
     function startGame() {
         clearInterval(gameLoop);
-        score = 0;
-        isStarted = (activeGame !== 'pacman');
         document.getElementById('game-wrapper').style.display = 'block';
-        document.getElementById('stat-bar').classList.remove('hidden');
         document.getElementById('game-over').style.display = 'none';
-        document.getElementById('hint').style.display = (activeGame === 'pacman') ? 'block' : 'none';
-        document.getElementById('leaderboard').style.display = (activeGame === 'snake') ? 'block' : 'none';
-        
         if(activeGame === 'snake') initSnake();
-        if(activeGame === 'tetris') initTetris();
-        if(activeGame === 'pacman') initPacman();
-        updateHUD();
+        else {
+            ctx.fillStyle = "white";
+            ctx.clearRect(0,0,900,550);
+            ctx.fillText(activeGame.toUpperCase() + " MODÜLÜ YÜKLENİYOR...", 100, 100);
+        }
     }
 
-    // --- SNAKE.IO OE MEKANİK ---
+    // --- SNAKE.IO (BASİT VERSİYON) ---
     let player, bots, foods;
     function initSnake() {
-        canvas.width = 900; canvas.height = 550;
-        player = { segments: [{x:450,y:275}], angle:0, size:25, speed:3, color:'#e94560' };
-        foods = Array.from({length:60}, () => ({x:Math.random()*900, y:Math.random()*550, c:`hsl(${Math.random()*360},80%,50%)`, v:1}));
-        bots = ["Kobra","Zehir","Alfa","Reis","Gölge"].map(n => createBot(n));
+        canvas.width = 800; canvas.height = 500;
+        player = { segments: [{x:400,y:250}], angle:0, size:20, speed:3, color:'#e94560' };
+        foods = Array.from({length:40}, () => ({x:Math.random()*800, y:Math.random()*500, c: `hsl(${Math.random()*360},70%,50%)`}));
+        bots = []; 
         gameLoop = setInterval(updateSnake, 1000/60);
     }
-    function createBot(n) { return { name:n, segments:[{x:Math.random()*900,y:Math.random()*550}], angle:Math.random()*6, size:20, speed:2.5, color:'#555', alive:true }; }
 
     function updateSnake() {
-        ctx.fillStyle = '#05050a'; ctx.fillRect(0,0,900,550);
+        ctx.fillStyle = '#05050a'; ctx.fillRect(0,0,800,500);
         let target = Math.atan2(mouse.y - player.segments[0].y, mouse.x - player.segments[0].x);
-        let diff = target - player.angle;
-        while(diff < -Math.PI) diff += Math.PI*2; while(diff > Math.PI) diff -= Math.PI*2;
-        player.angle += diff * 0.15;
-        let s = mouse.down ? player.speed*1.8 : player.speed;
-        let head = { x: player.segments[0].x + Math.cos(player.angle)*s, y: player.segments[0].y + Math.sin(player.angle)*s };
+        player.angle += (target - player.angle) * 0.1;
         
-        if(head.x<0||head.x>900||head.y<0||head.y>550) return die("Kenara çarptın!");
+        let head = { x: player.segments[0].x + Math.cos(player.angle)*player.speed, y: player.segments[0].y + Math.sin(player.angle)*player.speed };
+        
+        if(head.x<0||head.x>800||head.y<0||head.y>500) { clearInterval(gameLoop); document.getElementById('game-over').style.display='flex'; }
+        
         player.segments.unshift(head);
         if(player.segments.length > player.size) player.segments.pop();
 
-        // OE COLLISION
-        const all = [player, ...bots.filter(b=>b.alive)];
-        all.forEach(snA => {
-            const hA = snA.segments[0];
-            all.forEach(snB => {
-                if(snA === snB) return; // Kendi yanına çarparsa hiçbir şey olmaz (OE)
-                snB.segments.forEach((segB, idx) => {
-                    if(Math.hypot(hA.x-segB.x, hA.y-segB.y) < 12) {
-                        if(idx === 0) {
-                            if(snA.size > snB.size) killBot(snB); else if(snA === player) die("Kafa kafaya yutuldun!");
-                        } else {
-                            if(snA === player) die(snB.name + " sineğinin yanına çarptın!"); else killBot(snA);
-                        }
-                    }
-                });
-            });
-        });
-
-        bots.forEach(b => {
-            if(!b.alive) return;
-            b.angle += (Math.random()-0.5)*0.2;
-            let bh = { x: b.segments[0].x + Math.cos(b.angle)*b.speed, y: b.segments[0].y + Math.sin(b.angle)*b.speed };
-            if(bh.x<10||bh.x>890||bh.y<10||bh.y>540) b.angle += Math.PI;
-            b.segments.unshift(bh); if(b.segments.length > b.size) b.segments.pop();
-            ctx.fillStyle = b.color; b.segments.forEach(seg => { ctx.beginPath(); ctx.arc(seg.x,seg.y,7,0,Math.PI*2); ctx.fill(); });
-        });
-
         foods.forEach((f,i) => {
-            ctx.fillStyle=f.c; ctx.beginPath(); ctx.arc(f.x,f.y,f.v===1?4:6,0,Math.PI*2); ctx.fill();
-            if(Math.hypot(player.segments[0].x-f.x, player.segments[0].y-f.y)<15) { player.size+=f.v; score+=f.v*10; foods[i]={x:Math.random()*900, y:Math.random()*550, c:f.c, v:1}; updateHUD(); }
+            ctx.fillStyle=f.c; ctx.beginPath(); ctx.arc(f.x,f.y,5,0,Math.PI*2); ctx.fill();
+            if(Math.hypot(head.x-f.x, head.y-f.y)<15) { player.size+=2; foods[i]={x:Math.random()*800, y:Math.random()*500, c:f.c}; }
         });
 
-        ctx.fillStyle=player.color; player.segments.forEach((seg,i)=>{ ctx.beginPath(); ctx.arc(seg.x,seg.y,i===0?11:8,0,Math.PI*2); ctx.fill(); });
-        updateLB();
-    }
-    function killBot(b) { b.alive=false; b.segments.forEach((s,i)=>{ if(i%3===0) foods.push({x:s.x, y:s.y, c:b.color, v:5}); }); }
-    function updateLB() {
-        let l = [{n:"SEN", s:player.size*10, me:true}]; bots.forEach(b=>{ if(b.alive) l.push({n:b.name, s:b.size*10}); });
-        l.sort((a,b)=>b.s-a.s);
-        document.getElementById('lb-list').innerHTML = l.slice(0,5).map(x=>`<div class="lb-row ${x.me?'me':''}"><span>${x.n}</span><span>${Math.floor(x.s)}</span></div>`).join('');
+        ctx.fillStyle=player.color;
+        player.segments.forEach(s => { ctx.beginPath(); ctx.arc(s.x,s.y,8,0,Math.PI*2); ctx.fill(); });
     }
 
-    // --- TETRIS ---
-    function initTetris() { canvas.width = 300; canvas.height = 500; ctx.fillStyle="#fff"; ctx.fillText("TETRIS AKTIF", 100, 250); /* v1.8 logic */ }
-
-    // --- PACMAN ---
-    function initPacman() { canvas.width = 440; canvas.height = 300; ctx.fillStyle="#fff"; ctx.fillText("PACMAN AKTIF", 150, 150); /* v1.8 logic */ }
-
-    // --- GÜNLÜK VE SİSTEM ---
-    function saveNote() {
-        const text = document.getElementById('note-input').value;
-        if(!text) return;
-        stats.notes.unshift({ date: new Date().toLocaleString(), text });
-        localStorage.setItem('dw_v190', JSON.stringify(stats));
-        document.getElementById('note-input').value = '';
-        renderNotes();
-    }
-    function renderNotes() {
-        document.getElementById('note-list').innerHTML = stats.notes.map(n => `<div class="note-item"><small>${n.date}</small><p>${n.text}</p></div>`).join('');
-    }
-    function updateHUD() {
-        let cur = stats[activeGame];
-        if(score > cur.l * 500) { cur.l++; if(cur.l > cur.w*10) { cur.w++; cur.l=1; } localStorage.setItem('dw_v190', JSON.stringify(stats)); }
-        document.getElementById('stat-w').innerText = cur.w; document.getElementById('stat-l').innerText = cur.l; document.getElementById('stat-s').innerText = score;
-    }
-    function die(r) { clearInterval(gameLoop); document.getElementById('death-reason').innerText = r; document.getElementById('game-over').style.display = 'flex'; }
-    
-    // INPUTS
     canvas.addEventListener('mousemove', e => {
         const r = canvas.getBoundingClientRect();
         mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
-        if(activeGame === 'pacman' && !isStarted) isStarted = true;
     });
-    window.addEventListener('mousedown', () => mouse.down = true);
-    window.addEventListener('mouseup', () => mouse.down = false);
 </script>
 </body>
 </html>
