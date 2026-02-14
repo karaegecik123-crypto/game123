@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benim Dünyam | v2.0.0 - YKS Akademi</title>
+    <title>Benim Dünyam | v2.1.0 - YKS Akademi</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --dark: #0a0a12; --blue: #16213e; --accent: #e94560; --green: #00ff41; --text: #e2e2e2; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--dark); color: var(--text); overflow: hidden; }
         
         header { background: #1a1a2e; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); }
-        .version-group { display: flex; align-items: center; background: var(--accent); padding: 5px 15px; border-radius: 15px; cursor: pointer; font-weight: bold; }
+        .version-group { background: var(--accent); padding: 5px 15px; border-radius: 15px; font-weight: bold; }
 
         .container { display: flex; flex-direction: column; align-items: center; min-height: 80vh; padding-top: 50px; }
         .game-nav { display: none; justify-content: center; gap: 10px; background: #16213e; padding: 15px; width: 100%; }
@@ -27,15 +27,18 @@
         .menu-card i { font-size: 3rem; margin-bottom: 15px; color: var(--accent); }
 
         #game-wrapper { display: none; position: relative; }
-        canvas { background: #000; border: 3px solid #222; border-radius: 10px; }
-        #leaderboard { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.8); padding: 10px; border: 1px solid var(--accent); border-radius: 5px; min-width: 130px; font-family: monospace; }
+        canvas { background: #000; border: 3px solid #222; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        
+        /* Leaderboard Sadece Snake İçin */
+        #leaderboard { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.85); padding: 10px; border: 1px solid var(--accent); border-radius: 5px; min-width: 140px; font-family: monospace; display: none; }
+        .lb-row { display: flex; justify-content: space-between; font-size: 0.9rem; margin: 2px 0; }
         
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background: #1a1a2e; padding: 30px; border-radius: 15px; border: 2px solid var(--accent); width: 600px; max-height: 80vh; overflow-y: auto; position: relative; }
+        .modal-content { background: #1a1a2e; padding: 30px; border-radius: 15px; border: 2px solid var(--accent); width: 600px; max-height: 85vh; overflow-y: auto; position: relative; }
         
-        .course-list, .subject-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-        .course-btn { background: #16213e; border: 1px solid var(--accent); color: white; padding: 15px; border-radius: 8px; cursor: pointer; text-align: center; }
-        .subject-detail { background: #000; padding: 15px; border-left: 4px solid var(--green); margin-top: 10px; }
+        .course-btn { background: #16213e; border: 1px solid var(--accent); color: white; padding: 15px; border-radius: 8px; cursor: pointer; text-align: center; margin: 5px; transition: 0.2s; }
+        .course-btn:hover { background: var(--accent); }
+        .subject-detail { background: #000; padding: 15px; border-left: 4px solid var(--green); margin-bottom: 10px; }
         
         .hidden { display: none !important; }
     </style>
@@ -43,13 +46,13 @@
 <body>
 
 <header>
-    <div onclick="showHome()" style="cursor:pointer; font-weight: bold;"><i class="fas fa-dragon"></i> DİJİTAL DÜNYA</div>
-    <div class="version-group">v2.0.0 - YKS</div>
+    <div onclick="showHome()" style="cursor:pointer; font-weight: bold; letter-spacing: 1px;"><i class="fas fa-dragon"></i> DİJİTAL DÜNYA</div>
+    <div class="version-group">v2.1.0</div>
 </header>
 
 <div id="game-selector" class="game-nav">
     <button class="nav-btn" id="btn-snake" onclick="selectGame('snake')">SİNEK.IO</button>
-    <button class="nav-btn" id="btn-tetris" onclick="selectGame('tetris')">TETRIS</button>
+    <button class="nav-btn" id="btn-tetris" onclick="selectGame('tetris')">TETRIS (BÜYÜK)</button>
     <button class="nav-btn" id="btn-pacman" onclick="selectGame('pacman')">PACMAN</button>
 </div>
 
@@ -62,14 +65,14 @@
 
     <div id="game-wrapper">
         <div id="leaderboard">
-            <div style="text-align:center; color:var(--accent); font-size: 0.8rem;">TOP 5</div>
+            <div style="text-align:center; color:var(--accent); font-weight:bold; border-bottom: 1px solid #444; margin-bottom: 5px;">LİDERLER</div>
             <div id="lb-list"></div>
         </div>
         <canvas id="gameCanvas"></canvas>
         <div id="game-over" class="modal" style="position: absolute;">
             <div class="modal-content" style="text-align:center;">
                 <h1 style="color:var(--accent)">EYVAH!</h1>
-                <p id="death-reason"></p>
+                <p id="death-reason" style="margin-bottom: 20px;"></p>
                 <button class="nav-btn" onclick="startGame()">TEKRAR</button>
                 <button class="nav-btn" onclick="showHome()">MENÜ</button>
             </div>
@@ -79,11 +82,10 @@
 
 <div id="study-modal" class="modal">
     <div class="modal-content">
-        <span onclick="toggleModal('study-modal')" style="float:right; cursor:pointer;">&times;</span>
+        <span onclick="toggleModal('study-modal')" style="float:right; cursor:pointer; font-size: 2rem;">&times;</span>
         <h2 id="study-title">YKS Ders Listesi</h2>
         <div id="study-body">
-            <div class="course-list" id="course-list">
-                </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr;" id="course-list"></div>
         </div>
         <button id="back-btn" class="nav-btn hidden" onclick="renderCourses()" style="margin-top:20px;">Geri Dön</button>
     </div>
@@ -93,41 +95,39 @@
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     let activeGame = 'snake', gameLoop, score = 0;
-    let mouse = { x: 450, y: 275, down: false };
+    let mouse = { x: 400, y: 250, down: false };
 
-    // DERS VERİLERİ
+    // DERS NOTLARI VERİSİ
     const studyData = {
         "Matematik": [
-            {t: "Fonksiyonlar", d: "Tanım kümesi ve Değer kümesini karıştırma. f(x) grafiği okurken x eksenine odaklan."},
-            {t: "Türev", d: "Teğet eğimi türeve eşittir. Maks-Min problemlerinde türevi sıfıra eşitlemeyi unutma."},
-            {t: "İntegral", d: "Belirsiz integralde +C sabitini asla unutma! Alan hesaplarken x ekseninin altına dikkat."},
-            {t: "Trigonometri", d: "Birim çember hayat kurtarır. Cos teoremi ve Sin teoremini ezberle."},
-            {t: "Polinomlar", d: "P(x) polinomunun x-a ile bölümünden kalan P(a)'dır."},
-            {t: "Karmaşık Sayılar", d: "i kare = -1. Eşlenik ile çarparak paydayı reel yapabilirsin."},
-            {t: "Logaritma", d: "Taban 1 olamaz ve her zaman pozitif olmalı. log(a*b) = log a + log b."},
-            {t: "Diziler", d: "Aritmetik ve Geometrik diziler arasındaki fark: Biri toplama diğeri çarpma ile artar."},
-            {t: "Olasılık", d: "İstenen durum / Tüm durumlar. Koşullu olasılıkta örneklem uzay daralır."},
-            {t: "Permütasyon", d: "Sıralama önemlidir. Tekrarlı permütasyonda özdeş nesne sayısına böl."}
+            {t: "Fonksiyonlar", d: "Grafik okurken x ekseni tanım, y ekseni değer kümesidir."},
+            {t: "Türev", d: "Teğet eğimi = Türev. Maks-Min noktalarında türev sıfırdır."},
+            {t: "İntegral", d: "Belirsiz integralde +C eklemeyi unutma. Alan her zaman pozitiftir."},
+            {t: "Trigonometri", d: "Sin²x + Cos²x = 1. Birim çemberdeki koordinatları ezberle."},
+            {t: "Logaritma", d: "log(a*b) = log a + log b. log(a/b) = log a - log b."},
+            {t: "Karmaşık Sayılar", d: "i² = -1. i³ = -i. i⁴ = 1. Periyot 4'tür."},
+            {t: "Polinomlar", d: "Katsayılar toplamı için P(1), sabit terim için P(0) yazılır."},
+            {t: "Olasılık", d: "Tüm durumlar paydaya yazılır. İstenen durum yukarıya."}
         ],
         "Türkçe": [
-            {t: "Yazım Kuralları", d: "Birleşik fiillerde ses düşmesi/türemesi varsa bitişik yazılır (Kaybolmak)."},
-            {t: "Noktalama", d: "İki noktadan sonra açıklama geliyorsa büyük, örnek geliyorsa küçük harfle başlanır."},
-            {t: "Paragraf", d: "Önce soruyu oku, sonra metni. Ana düşünce genelde son cümlededir."},
-            {t: "Cümle Ögeleri", d: "Yüklemi bulduktan sonra ilk özneyi, sonra nesneyi bul (YÖN yöntemi)."},
-            {t: "Fiilimsiler", d: "İsim-fiil (Ma-ış-mak), Sıfat-fiil (An-ası-mez-ar-dik-ecek-miş)."},
-            {t: "Ses Bilgisi", d: "Ünsüz benzeşmesi (fıstıkçı şahap) ve yumuşamasına dikkat."},
-            {t: "Anlatım Bozukluğu", d: "Özne-yüklem uyumsuzluğu ve gereksiz sözcük kullanımı en çok çıkanlardır."},
-            {t: "Sözcükte Yapı", d: "Kök, gövde, yapım eki ve çekim ekini ayırırken anlam ilişkisini koparma."}
+            {t: "Paragraf", d: "Parçayı bölme sorularında yeni bir konuya geçilen yeri bul."},
+            {t: "Yazım Kuralları", d: "Şey her zaman ayrı yazılır. Birleşik kelimelere dikkat."},
+            {t: "Noktalama", d: "Eş görevli kelimeler arasına virgül konur."},
+            {t: "Cümle Ögeleri", d: "Önce Yüklem, sonra Özne, sonra Nesne bulunur."},
+            {t: "Fiilimsiler", d: "İsim-fiil (ma-ış-mak), Sıfat-fiil (an-ası-mez-ar-dik-ecek-miş)."},
+            {t: "Anlatım Bozukluğu", d: "Gereksiz sözcük kullanımı en sık hatadır."},
+            {t: "Sözcükte Yapı", d: "Basit, Türemiş ve Birleşik kelime ayrımını yap."},
+            {t: "Ses Bilgisi", d: "Ünlü düşmesi ve Ünsüz benzeşmesine dikkat."}
         ],
         "Fizik": [
-            {t: "Vektörler", d: "Bileşke kuvvet bulurken uç uca ekleme veya paralelkenar yöntemini kullan."},
-            {t: "Newton Kanunları", d: "F=m.a. Sürtünme kuvveti her zaman harekete zıt yönlü değildir (Yuvarlanma)."},
-            {t: "Elektrik", d: "V=I.R (Ohm Kanunu). Paralel bağlı dirençlerde voltajlar eşittir."},
-            {t: "Optik", d: "Işığın kırılmasında 'Az yoğun -> Çok yoğun' yaklaşırken 'Çok -> Az' uzaklaşır."},
-            {t: "Modern Fizik", d: "Fotoelektrik olayda ışığın tanecik modeli kanıtlanır."},
-            {t: "Dalgalar", d: "Boyuna dalga (Ses), Enine dalga (Işık). Su dalgası hem enine hem boyunadır."},
-            {t: "Manyetizma", d: "Sağ el kuralı: Baş parmak akım, dört parmak manyetik alan."},
-            {t: "Kütle Merkezi", d: "Simetrik cisimlerde geometrik merkezdir. Parça eklenirse merkez o yöne kayar."}
+            {t: "Vektörler", d: "Zıt yönlü kuvvetler birbirinden çıkarılır."},
+            {t: "Newton", d: "F = m * a. Sürtünme kuvveti hareketi engellemeye çalışır."},
+            {t: "Enerji", d: "Mekanik enerji = Kinetik + Potansiyel. Sürtünme yoksa korunur."},
+            {t: "Optik", d: "Düzlem aynada görüntü simetrik ve sanaldır."},
+            {t: "Elektrik", d: "V = I * R. Seri bağlı dirençler toplanır."},
+            {t: "Dalgalar", d: "Hız = Frekans * Dalga Boyu. Hız sadece ortama bağlıdır."},
+            {t: "Modern Fizik", d: "Işık hem dalga hem tanecik özelliği gösterir."},
+            {t: "Basınç", d: "Katı basıncı kuvvetle doğru, yüzey alanı ile ters orantılıdır."}
         ]
     };
 
@@ -144,31 +144,26 @@
         if(id === 'study-modal') renderCourses();
     }
 
-    // DERS NOTLARI MANTIĞI
     function renderCourses() {
-        document.getElementById('study-title').innerText = "YKS Ders Listesi";
+        document.getElementById('study-title').innerText = "Ders Seçiniz";
         document.getElementById('back-btn').classList.add('hidden');
         let html = '';
-        for(let course in studyData) {
-            html += `<div class="course-btn" onclick="renderSubjects('${course}')">${course}</div>`;
-        }
+        for(let course in studyData) html += `<div class="course-btn" onclick="renderSubjects('${course}')">${course}</div>`;
         document.getElementById('course-list').innerHTML = html;
         document.getElementById('course-list').classList.remove('hidden');
     }
 
     function renderSubjects(course) {
-        document.getElementById('study-title').innerText = course + " Konuları";
+        document.getElementById('study-title').innerText = course + " Notları";
         document.getElementById('course-list').classList.add('hidden');
         document.getElementById('back-btn').classList.remove('hidden');
-        let html = '<div class="subject-list">';
+        let html = '';
         studyData[course].forEach(item => {
-            html += `<div class="subject-detail"><strong>${item.t}</strong><p style="font-size:0.8rem; margin-top:5px;">${item.d}</p></div>`;
+            html += `<div class="subject-detail"><strong>${item.t}</strong><p>${item.d}</p></div>`;
         });
-        html += '</div>';
         document.getElementById('study-body').innerHTML = `<div id="course-list" class="course-list"></div>` + html;
     }
 
-    // OYUN KONTROL
     function selectGame(game) {
         activeGame = game;
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -182,88 +177,82 @@
         document.getElementById('game-wrapper').style.display = 'block';
         document.getElementById('game-over').style.display = 'none';
         
+        // Leaderboard sadece Snake'te gözüksün
+        document.getElementById('leaderboard').style.display = (activeGame === 'snake') ? 'block' : 'none';
+        
         if(activeGame === 'snake') initSnake();
         if(activeGame === 'tetris') initTetris();
         if(activeGame === 'pacman') initPacman();
     }
 
-    // --- SNAKE.IO (Botlar Korundu) ---
+    // --- SNAKE.IO ---
     let player, bots, foods;
     function initSnake() {
         canvas.width = 800; canvas.height = 500;
         player = { segments: [{x:400,y:250}], angle:0, size:20, speed:3, color:'#e94560' };
-        foods = Array.from({length:50}, () => ({x:Math.random()*800, y:Math.random()*500, c: `hsl(${Math.random()*360},70%,50%)`}));
-        bots = ["AI-Zeka", "Robot-X", "Sinek-Bey"].map(n => ({
-            name: n, segments: [{x:Math.random()*800, y:Math.random()*500}], angle: Math.random()*6, size: 15, speed: 2, color: '#555', alive: true
+        foods = Array.from({length:50}, () => ({x:Math.random()*800, y:Math.random()*500, c:`hsl(${Math.random()*360},70%,50%)`}));
+        bots = ["Kobra","AI-Bot","Sinsi","Reis"].map(n => ({
+            name:n, segments:[{x:Math.random()*800,y:Math.random()*500}], angle:Math.random()*6, size:18, speed:2.5, color:'#555', alive:true
         }));
         gameLoop = setInterval(updateSnake, 1000/60);
     }
 
     function updateSnake() {
         ctx.fillStyle = '#05050a'; ctx.fillRect(0,0,800,500);
-        
-        // Player
         let target = Math.atan2(mouse.y - player.segments[0].y, mouse.x - player.segments[0].x);
-        player.angle += (target - player.angle) * 0.1;
+        player.angle += (target - player.angle) * 0.15;
         let head = { x: player.segments[0].x + Math.cos(player.angle)*player.speed, y: player.segments[0].y + Math.sin(player.angle)*player.speed };
         
-        if(head.x<0 || head.x>800 || head.y<0 || head.y>500) return die("Sınırı geçtin!");
+        if(head.x<0||head.x>800||head.y<0||head.y>500) return die("Kenara çarptın!");
         player.segments.unshift(head);
         if(player.segments.length > player.size) player.segments.pop();
 
-        // Botlar
         bots.forEach(b => {
             if(!b.alive) return;
-            b.angle += (Math.random()-0.5)*0.2;
+            b.angle += (Math.random()-0.5)*0.3;
             let bh = { x: b.segments[0].x + Math.cos(b.angle)*b.speed, y: b.segments[0].y + Math.sin(b.angle)*b.speed };
-            if(bh.x<0 || bh.x>800 || bh.y<0 || bh.y>500) b.angle += Math.PI;
+            if(bh.x<10||bh.x>790||bh.y<10||bh.y>490) b.angle += Math.PI;
             b.segments.unshift(bh); if(b.segments.length > b.size) b.segments.pop();
             ctx.fillStyle = b.color; b.segments.forEach(s => ctx.fillRect(s.x, s.y, 8, 8));
         });
 
-        // Food
-        foods.forEach((f, i) => {
-            ctx.fillStyle = f.c; ctx.beginPath(); ctx.arc(f.x, f.y, 4, 0, Math.PI*2); ctx.fill();
-            if(Math.hypot(player.segments[0].x-f.x, player.segments[0].y-f.y) < 15) {
-                player.size += 2; score += 10; foods[i] = {x:Math.random()*800, y:Math.random()*500, c:f.c};
+        foods.forEach((f,i) => {
+            ctx.fillStyle = f.c; ctx.beginPath(); ctx.arc(f.x,f.y,4,0,Math.PI*2); ctx.fill();
+            if(Math.hypot(player.segments[0].x-f.x, player.segments[0].y-f.y)<15) {
+                player.size+=2; score+=10; foods[i]={x:Math.random()*800, y:Math.random()*500, c:f.c};
             }
         });
 
-        ctx.fillStyle = player.color;
-        player.segments.forEach(s => ctx.fillRect(s.x, s.y, 10, 10));
-        updateLB();
+        ctx.fillStyle = player.color; player.segments.forEach(s => ctx.fillRect(s.x,s.y,10,10));
+        let list = [{n:"SEN", s:score}].concat(bots.filter(b=>b.alive).map(b=>({n:b.name, s:b.size*5}))).sort((a,b)=>b.s-a.s);
+        document.getElementById('lb-list').innerHTML = list.slice(0,5).map(x=>`<div class="lb-row"><span>${x.n}</span><span>${x.s}</span></div>`).join('');
     }
 
-    function updateLB() {
-        let list = [{n: "SEN", s: score}].concat(bots.filter(b=>b.alive).map(b=>({n:b.name, s:b.size*5})));
-        list.sort((a,b)=>b.s-a.s);
-        document.getElementById('lb-list').innerHTML = list.map(x=>`<div>${x.n}: ${x.s}</div>`).join('');
-    }
-
-    // --- TETRIS ---
+    // --- TETRIS (BÜYÜTÜLDÜ) ---
     let board, piece, tetrominoes;
     function initTetris() {
-        canvas.width = 240; canvas.height = 400;
-        const scale = 20;
+        canvas.width = 360; canvas.height = 600; // Ekran Büyütüldü
+        const scale = 30; // Bloklar Büyütüldü
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.scale(scale, scale);
         board = Array.from({length: 20}, () => Array(12).fill(0));
         tetrominoes = {
-            'I': [[1,1,1,1]], 'J': [[1,0,0],[1,1,1]], 'L': [[0,0,1],[1,1,1]],
-            'O': [[1,1],[1,1]], 'S': [[0,1,1],[1,1,0]], 'T': [[0,1,0],[1,1,1]], 'Z': [[1,1,0],[0,1,1]]
+            'I': [[1,1,1,1]], 'O': [[1,1],[1,1]], 'T': [[0,1,0],[1,1,1]],
+            'S': [[0,1,1],[1,1,0]], 'Z': [[1,1,0],[0,1,1]], 'J': [[1,0,0],[1,1,1]], 'L': [[0,0,1],[1,1,1]]
         };
         piece = resetPiece();
-        gameLoop = setInterval(updateTetris, 500);
+        gameLoop = setInterval(updateTetris, 400);
     }
 
     function resetPiece() {
         const types = 'IJLOSTZ';
         const type = types[Math.floor(Math.random()*types.length)];
-        return { pos: {x: 4, y: 0}, matrix: tetrominoes[type], color: '#e94560' };
+        return { pos: {x: 4, y: 0}, matrix: tetrominoes[type] };
     }
 
     function updateTetris() {
         piece.pos.y++;
-        if (collide()) { piece.pos.y--; merge(); piece = resetPiece(); if(collide()) die("Kule doldu!"); }
+        if(collide()) { piece.pos.y--; merge(); piece = resetPiece(); if(collide()) die("Oyun Bitti!"); }
         drawTetris();
     }
 
@@ -279,68 +268,55 @@
 
     function merge() {
         piece.matrix.forEach((row, y) => {
-            row.forEach((value, x) => {
-                if(value !== 0) board[y+piece.pos.y][x+piece.pos.x] = 1;
-            });
+            row.forEach((value, x) => { if(value !== 0) board[y+piece.pos.y][x+piece.pos.x] = 1; });
         });
-        // Satır silme
         board.forEach((row, y) => {
-            if(row.every(v => v !== 0)) {
-                board.splice(y, 1); board.unshift(Array(12).fill(0)); score += 100;
-            }
+            if(row.every(v => v !== 0)) { board.splice(y,1); board.unshift(Array(12).fill(0)); score += 100; }
         });
     }
 
     function drawTetris() {
         ctx.fillStyle = '#000'; ctx.fillRect(0,0,12,20);
-        board.forEach((row, y) => row.forEach((v, x) => { if(v) { ctx.fillStyle='blue'; ctx.fillRect(x,y,1,1); }}));
-        piece.matrix.forEach((row, y) => row.forEach((v, x) => { if(v) { ctx.fillStyle=piece.color; ctx.fillRect(x+piece.pos.x, y+piece.pos.y,1,1); }}));
+        board.forEach((row, y) => row.forEach((v, x) => { if(v) { ctx.fillStyle='#16213e'; ctx.fillRect(x,y,1,1); ctx.strokeStyle="#fff"; ctx.lineWidth=0.05; ctx.strokeRect(x,y,1,1); }}));
+        piece.matrix.forEach((row, y) => row.forEach((v, x) => { if(v) { ctx.fillStyle=varColor(); ctx.fillRect(x+piece.pos.x, y+piece.pos.y, 1, 1); ctx.strokeStyle="#fff"; ctx.lineWidth=0.05; ctx.strokeRect(x+piece.pos.x, y+piece.pos.y, 1, 1); }}));
     }
+    function varColor() { return '#e94560'; }
 
     // --- PACMAN ---
     let pac, ghosts, dots;
     function initPacman() {
-        canvas.width = 400; canvas.height = 400;
-        pac = { x: 200, y: 200, dir: {x:0, y:0}, nextDir: {x:0,y:0} };
+        canvas.width = 500; canvas.height = 400;
+        pac = { x: 250, y: 200, dir: {x:0, y:0} };
         dots = [];
-        for(let i=0; i<40; i++) dots.push({x: Math.random()*380+10, y: Math.random()*380+10});
-        ghosts = [
-            {x: 20, y: 20, c: 'red'}, {x: 380, y: 380, c: 'pink'}
-        ];
+        for(let i=0; i<30; i++) dots.push({x: Math.random()*480+10, y: Math.random()*380+10});
+        ghosts = [{x: 50, y: 50, c: 'red'}, {x: 450, y: 350, c: 'cyan'}];
         gameLoop = setInterval(updatePacman, 1000/60);
     }
 
     function updatePacman() {
-        ctx.fillStyle = '#000'; ctx.fillRect(0,0,400,400);
-        
-        // Hareket
-        pac.x += pac.dir.x * 2; pac.y += pac.dir.y * 2;
-        if(pac.x < 0) pac.x = 400; if(pac.x > 400) pac.x = 0;
-        if(pac.y < 0) pac.y = 400; if(pac.y > 400) pac.y = 0;
+        ctx.fillStyle = '#000'; ctx.fillRect(0,0,500,400);
+        pac.x += pac.dir.x * 2.5; pac.y += pac.dir.y * 2.5;
+        if(pac.x<0) pac.x=500; if(pac.x>500) pac.x=0;
+        if(pac.y<0) pac.y=400; if(pac.y>400) pac.y=0;
 
-        // Puan toplama
         dots = dots.filter(d => {
-            if(Math.hypot(pac.x-d.x, pac.y-d.y) < 10) { score += 5; return false; }
-            ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(d.x, d.y, 2, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(d.x, d.y, 3, 0, Math.PI*2); ctx.fill();
+            if(Math.hypot(pac.x-d.x, pac.y-d.y) < 15) { score+=5; return false; }
             return true;
         });
 
-        // Hayaletler
         ghosts.forEach(g => {
-            g.x += (pac.x - g.x) * 0.01; g.y += (pac.y - g.y) * 0.01;
-            ctx.fillStyle = g.c; ctx.beginPath(); ctx.arc(g.x, g.y, 12, 0, Math.PI, true); ctx.lineTo(g.x+12, g.y+15); ctx.lineTo(g.x-12, g.y+15); ctx.fill();
-            if(Math.hypot(pac.x-g.x, pac.y-g.y) < 20) die("Hayalet seni yakaladı!");
+            g.x += (pac.x - g.x) * 0.015; g.y += (pac.y - g.y) * 0.015;
+            ctx.fillStyle = g.c; ctx.beginPath(); ctx.arc(g.x, g.y, 13, 0, Math.PI, true); ctx.lineTo(g.x+13, g.y+15); ctx.lineTo(g.x-13, g.y+15); ctx.fill();
+            if(Math.hypot(pac.x-g.x, pac.y-g.y) < 20) die("Hayalet çarptı!");
         });
 
-        // Pacman çizim
-        ctx.fillStyle = 'yellow'; ctx.beginPath();
-        ctx.arc(pac.x, pac.y, 15, 0.2 * Math.PI, 1.8 * Math.PI);
-        ctx.lineTo(pac.x, pac.y); ctx.fill();
+        ctx.fillStyle = 'yellow'; ctx.beginPath(); ctx.arc(pac.x, pac.y, 15, 0.2*Math.PI, 1.8*Math.PI); ctx.lineTo(pac.x, pac.y); ctx.fill();
     }
 
     function die(r) { clearInterval(gameLoop); document.getElementById('death-reason').innerText = r; document.getElementById('game-over').style.display = 'flex'; }
 
-    // GİRDİLER
+    // KONTROLLER
     window.addEventListener('keydown', e => {
         if(activeGame === 'tetris') {
             if(e.key === 'ArrowLeft') { piece.pos.x--; if(collide()) piece.pos.x++; }
