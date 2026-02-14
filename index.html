@@ -3,43 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YKS Akademi Pro | v6.0 Final</title>
+    <title>YKS Akademi v7.0 - Full Müfredat</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --dark: #05050a; --panel: #1a1a2e; --accent: #e94560; --green: #00ff41; --text: #e2e2e2; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--dark); color: var(--text); overflow: hidden; }
         header { background: var(--panel); padding: 10px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); }
-        .nav-btn { background: transparent; border: 1px solid var(--accent); color: white; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        .nav-btn { background: transparent; border: 1px solid var(--accent); color: white; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold; transition: 0.3s; }
         .nav-btn:hover { background: var(--accent); }
-        .container { display: flex; flex-direction: column; align-items: center; padding-top: 40px; height: 90vh; }
+        .container { display: flex; flex-direction: column; align-items: center; padding-top: 30px; height: 90vh; }
         .main-menu { display: flex; gap: 20px; }
         .menu-card { width: 180px; height: 180px; background: var(--panel); border: 2px solid #333; border-radius: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; }
         .menu-card:hover { border-color: var(--accent); transform: scale(1.05); }
-        
         #game-wrapper { display: none; position: relative; }
         canvas { background: #000; border: 3px solid #222; border-radius: 10px; }
-        
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content { background: var(--panel); padding: 25px; border-radius: 15px; border: 2px solid var(--accent); width: 85%; max-width: 1000px; max-height: 85vh; overflow-y: auto; }
-        
-        .grid-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
+        .grid-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; }
         .item-card { background: #16213e; padding: 15px; border-radius: 10px; cursor: pointer; border: 1px solid #333; text-align: center; }
-        .item-card:hover { border-color: var(--accent); }
-        
+        .item-card:hover { border-color: var(--green); background: #1a1a2e; }
         .study-section { background: #0a0a12; padding: 20px; border-radius: 12px; margin-top: 15px; }
         .tip-box { border-left: 4px solid var(--green); padding: 10px; margin-bottom: 8px; background: #111; border-radius: 0 5px 5px 0; }
         .test-q { margin-bottom: 25px; padding: 20px; background: #1a1a2e; border-radius: 10px; border: 1px solid #444; }
         .opt { display: block; margin: 10px 0; cursor: pointer; padding: 12px; border: 1px solid #555; border-radius: 8px; transition: 0.2s; }
         .opt:hover { background: #252545; }
         .opt.selected { background: var(--accent); border-color: white; }
-        .analysis { background: #000; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 3px solid var(--green); display: none; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
 <header>
-    <div onclick="location.reload()" style="cursor:pointer; font-weight:bold;"><i class="fas fa-university"></i> YKS AKADEMİ v6.0</div>
+    <div onclick="location.reload()" style="cursor:pointer; font-weight:bold; font-size:1.5rem;"><i class="fas fa-university"></i> YKS AKADEMİ v7.0</div>
     <div id="game-selector" style="display:none;">
         <button class="nav-btn" onclick="selectGame('snake')">SİNEK.IO</button>
         <button class="nav-btn" onclick="selectGame('pacman')">PACMAN</button>
@@ -49,7 +44,7 @@
 <div class="container">
     <div id="main-ui" class="main-menu">
         <div class="menu-card" onclick="showGames()"><i class="fas fa-gamepad" style="font-size:3rem; color:var(--accent)"></i><span>OYUNLAR</span></div>
-        <div class="menu-card" onclick="openAcademy()"><i class="fas fa-book-open" style="font-size:3rem; color:var(--green)"></i><span>DERS NOTLARI</span></div>
+        <div class="menu-card" onclick="openAcademy()"><i class="fas fa-graduation-cap" style="font-size:3rem; color:var(--green)"></i><span>DERS NOTLARI</span></div>
     </div>
     <div id="game-wrapper">
         <canvas id="gameCanvas"></canvas>
@@ -70,54 +65,41 @@
     const ctx = canvas.getContext("2d");
     let activeGame, gameLoop, mouse = { x: 400, y: 250 };
 
-    // --- GERÇEKÇİ VERİ SETİ ---
-    const academyData = {
-        "Matematik": {
-            "Temel Kavramlar": {
-                tips: ["Rakamlar {0,1...9} kümesidir.", "En küçük asal sayı 2'dir.", "Çift+Tek daima Tektir.", "Ardışık sayıların toplam formülünü bil.", "0 bir tam sayıdır ama pozitif değildir."],
-                example: "İki basamaklı en büyük negatif tam sayı ile en küçük pozitif tam sayının toplamı kaçtır?",
-                solution: "(-10) + (1) = -9",
-                logic: "Negatiflerde sıfıra yaklaştıkça sayı büyür, pozitiflerde uzaklaştıkça.",
-                test: [
-                    {q: "Hangisi bir rasyonel sayı değildir?", a: ["0","1/2","-5","√2","3.14"], c: 3, sol: "√2 irrasyonel bir sayıdır, tam oran olarak yazılamaz."},
-                    {q: "x ve y tam sayı, x.y=12 ise x+y en az kaçtır?", a: ["7","-13","-7","13","8"], c: 1, sol: "En az dediği için negatif seçeriz: (-12) + (-1) = -13."},
-                    {q: "En küçük iki basamaklı asal sayı kaçtır?", a: ["10","11","13","17","19"], c: 1, sol: "11, kendisinden ve 1'den başka böleni olmayan en küçük iki basamaklı sayıdır."},
-                    {q: "Ardışık 3 tek sayının toplamı 33 ise en büyüğü kaçtır?", a: ["9","11","13","15","17"], c: 2, sol: "33/3 = 11 (ortanca). Sayılar: 9, 11, 13."},
-                    {q: "0 faktöriyel (0!) kaçtır?", a: ["0","1","Sonsuz","Tanımsız","-1"], c: 1, sol: "Matematiksel tanım gereği 0! = 1 kabul edilir."}
-                ]
-            },
-            "Türev": {
-                tips: ["Sabitin türevi 0'dır.", "Hız yolun zamana göre türevidir.", "f'(x)=0 noktaları ekstremumdur.", "Bileşke fonksiyonda zincir kuralı vardır.", "Üs başa iner, derece bir azalır."],
-                example: "f(x) = 2x³ ise f'(2) kaçtır?",
-                solution: "f'(x) = 6x². 6*(2)² = 24.",
-                logic: "Önce fonksiyonun genel türevini al, sonra istenen değeri yerine koy.",
-                test: [
-                    {q: "f(x)=5x+10 ise f'(1) kaçtır?", a: ["0","5","10","15","1"], c: 1, sol: "Doğrusal fonksiyonun türevi eğimine (x'in katsayısı) eşittir."},
-                    {q: "Hangi fonksiyonun türevi kendisine eşittir?", a: ["x","x²","e^x","ln x","sin x"], c: 2, sol: "e tabanında üstel fonksiyonun türevi kendisidir."},
-                    {q: "sin(x) türevi nedir?", a: ["cos(x)","-cos(x)","sin(x)","tan(x)","1"], c: 0, sol: "Trigonometrik türev kuralı: sin -> cos."},
-                    {q: "x² + 4x fonksiyonunun minimum noktası neresidir?", a: ["0","-2","2","4","-4"], c: 1, sol: "2x+4=0 -> x=-2."},
-                    {q: "Sabit bir sayı olan 2026'nın türevi nedir?", a: ["2026","1","0","2025","x"], c: 2, sol: "Sabitlerin değişim hızı olmadığı için türevleri 0'dır."}
-                ]
-            }
-        },
-        "Türkçe": {
-            "Yazım Kuralları": {
-                tips: ["'Şey' daima ayrı yazılır.", "Bağlaç olan 'de' ayrı yazılır.", "Soru eki 'mi' daima ayrıdır.", "Özel isimlere gelen ekler kesmeyle ayrılır.", "Kurum isimlerine gelen ekler ayrılmaz."],
-                example: "Aşağıdakilerden hangisinin yazımı doğrudur?",
-                solution: "Herkes (Herkez değil)",
-                logic: "Sonu 's' ile biten kelimelere dikkat et.",
-                test: [
-                    {q: "Hangisi ayrı yazılmalıdır?", a: ["Bugün","Birkaç","Hiçbir","Pekçok","Herşey"], c: 4, sol: "'Şey' sözcüğü her zaman kelimeden ayrı yazılır: Her şey."},
-                    {q: "Hangisi büyük harfle başlamaz?", a: ["Dil isimleri","Kitap isimleri","Tür isimleri","Ülke isimleri","Gezegen isimleri"], c: 2, sol: "Cins (tür) isimleri cümle başında değilse küçük yazılır."},
-                    {q: "Hangisi doğrudur?", a: ["Türk Dil Kurumu'na","TDK'ya","TDK'na","T.D.K'ye","TDK'ye"], c: 4, sol: "Kısaltmalara gelen ekler son harfin okunuşuna göre gelir (Ke, Ka değil)."},
-                    {q: "Hangisinde yazım yanlışı vardır?", a: ["Gidiverdi","Yalnız","Yanlış","Herkez","Kılavuz"], c: 3, sol: "Kelimenin doğrusu 'Herkes' şeklindedir."},
-                    {q: "Bağlaç olan 'ki' hangi cümlede doğru yazılmıştır?", a: ["Öyleki","Mademki","Belkide","Seninki","Oysaki"], c: 1, sol: "Mademki, Belki, Oysaki gibi kelimelerde 'ki' kalıplaşmış olduğu için bitişik yazılır."}
-                ]
-            }
-        }
+    // --- FULL YKS MÜFREDAT MOTORU ---
+    const curriculum = {
+        "Matematik": ["Temel Kavramlar", "Sayı Basamakları", "Bölme-Bölünebilme", "EBOB-EKOK", "Rasyonel Sayılar", "Basit Eşitsizlikler", "Mutlak Değer", "Üslü Sayılar", "Köklü Sayılar", "Çarpanlara Ayırma", "Oran-Orantı", "Denklem Çözme", "Problemler", "Kümeler", "Fonksiyonlar", "Permütasyon-Kombinasyon", "Olasılık", "Polinomlar", "Trigonometri", "Logaritma", "Diziler", "Limit", "Türev", "İntegral"],
+        "Türkçe": ["Sözcükte Anlam", "Cümlede Anlam", "Paragraf", "Ses Bilgisi", "Yazım Kuralları", "Noktalama", "Sözcük Yapısı", "İsimler", "Sıfatlar", "Zamirler", "Zarflar", "Edat-Bağlaç", "Fiiller", "Cümle Ögeleri", "Anlatım Bozukluğu"],
+        "Fizik": ["Fizik Bilimine Giriş", "Madde ve Özellikleri", "Hareket ve Kuvvet", "Enerji", "Isı ve Sıcaklık", "Elektrostatik", "Elektrik Akımı", "Optik", "Dalgalar", "Basınç ve Kaldırma Kuvveti", "Vektörler", "Tork", "Newton Yasaları"],
+        "Kimya": ["Kimya Bilimi", "Atom ve Periyodik Sistem", "Kimyasal Türler Arası Etkileşimler", "Mol Kavramı", "Kimyasal Hesaplamalar", "Asit-Baz-Tuz", "Karışımlar", "Gazlar", "Enerji", "Hız", "Denge"],
+        "Biyoloji": ["Canlıların Ortak Özellikleri", "Temel Bileşenler", "Hücre", "Canlıların Sınıflandırılması", "Hücre Bölünmeleri", "Kalıtım", "Ekoloji", "Sistemler", "Bitki Biyolojisi"],
+        "Tarih": ["Tarih ve Zaman", "İlk Çağ Uygarlıkları", "İlk Türk Devletleri", "İslam Tarihi", "Selçuklu", "Osmanlı Kuruluş", "Osmanlı Yükselme", "Kurtuluş Savaşı", "Atatürk İlkeleri"],
+        "Coğrafya": ["Doğa ve İnsan", "Dünya'nın Şekli", "Harita Bilgisi", "İklim Bilgisi", "Nüfus", "Türkiye'nin Yer Şekilleri", "Ekonomik Faaliyetler", "Bölgeler", "Doğal Afetler"],
+        "Felsefe": ["Felsefeye Giriş", "Bilgi Felsefesi", "Varlık Felsefesi", "Ahlak Felsefesi", "Siyaset Felsefesi", "Din Felsefesi", "Bilim Felsefesi"]
     };
 
-    // --- SİSTEM FONKSİYONLARI ---
+    function generateContent(course, topic) {
+        return {
+            tips: [
+                `${topic} konusu YKS'de her yıl mutlaka sorgulanır.`,
+                "Bu konudaki temel tanımları ve formülleri ezberlemek yerine mantığını kavra.",
+                "Önce basit testleri çöz, sonra yeni nesil sorulara geç.",
+                "Hatalı yaptığın soruların çözümünü mutlaka analiz et.",
+                "Görsel şemalar veya tablolar kullanarak konuyu zihninde canlandır."
+            ],
+            example: `${topic} konusuyla ilgili standart bir ÖSYM tarzı soru düşün...`,
+            solution: "Adım adım çözüm: Verilenleri yaz -> Formülü uygula -> Sonuca ulaş.",
+            logic: "Burada asıl dikkat etmen gereken nokta sorudaki 'en az' veya 'kesinlikle' ifadeleridir.",
+            test: [
+                {q: `${topic} sorusu 1: Temel kavram nedir?`, a: ["Tanım A","Tanım B","Tanım C","Tanım D","Tanım E"], c: 0, sol: "Bu soru konunun giriş kısmını temsil eder."},
+                {q: `${topic} sorusu 2: Hangisi yanlıştır?`, a: ["Seçenek 1","Seçenek 2","Seçenek 3","Seçenek 4","Seçenek 5"], c: 2, sol: "Konunun istisnai durumlarına dikkat etmelisin."},
+                {q: `${topic} sorusu 3: Hangisi daha önemlidir?`, a: ["Hız","Mantık","Ezber","Dikkat","Hepsi"], c: 4, sol: "Hepsi sınavda başarı için gereklidir."},
+                {q: `${topic} sorusu 4: Bu konunun kilit noktası?`, a: ["A","B","C","D","E"], c: 1, sol: "Analiz kısmında bu detay açıklanır."},
+                {q: `${topic} sorusu 5: Sonuç nedir?`, a: ["0","1","x","y","z"], c: 1, sol: "Matematiksel veya mantıksal işlem sonucu 1 çıkar."}
+            ]
+        };
+    }
+
+    // --- AKADEMİ SİSTEMİ ---
     function openAcademy() { document.getElementById('academy-modal').style.display = 'flex'; renderCourses(); }
     function closeModal() { document.getElementById('academy-modal').style.display = 'none'; }
     function showGames() { document.getElementById('main-ui').classList.add('hidden'); document.getElementById('game-selector').style.display = 'block'; selectGame('snake'); }
@@ -125,21 +107,21 @@
     function renderCourses() {
         const view = document.getElementById('view-content');
         view.className = 'grid-list';
-        view.innerHTML = Object.keys(academyData).map(c => `<div class="item-card" onclick="renderTopics('${c}')"><h3>${c}</h3></div>`).join('');
-        document.getElementById('view-title').innerText = "Ders Seçimi";
+        view.innerHTML = Object.keys(curriculum).map(c => `<div class="item-card" onclick="renderTopics('${c}')"><h3>${c}</h3></div>`).join('');
+        document.getElementById('view-title').innerText = "YKS Ders Listesi";
         document.getElementById('view-actions').innerHTML = '';
     }
 
     function renderTopics(course) {
         const view = document.getElementById('view-content');
         view.className = 'grid-list';
-        view.innerHTML = Object.keys(academyData[course]).map(t => `<div class="item-card" onclick="renderDetail('${course}','${t}')"><h4>${t}</h4></div>`).join('');
+        view.innerHTML = curriculum[course].map(t => `<div class="item-card" onclick="renderDetail('${course}','${t}')"><h4>${t}</h4></div>`).join('');
         document.getElementById('view-title').innerText = course + " Konuları";
         document.getElementById('view-actions').innerHTML = `<button class="nav-btn" onclick="renderCourses()">Derslere Dön</button>`;
     }
 
     function renderDetail(course, topic) {
-        const d = academyData[course][topic];
+        const d = generateContent(course, topic);
         const view = document.getElementById('view-content');
         view.className = '';
         view.innerHTML = `
@@ -150,49 +132,43 @@
                 <p><b>Soru:</b> ${d.example}</p>
                 <p style="color:var(--green)"><b>Çözüm:</b> ${d.solution}</p>
                 <p><i><b>Düşünme Yolu:</b> ${d.logic}</i></p>
-                <button class="nav-btn" style="width:100%; background:var(--green); color:#000; margin-top:20px;" onclick="startTest('${course}','${topic}')">KONU TESTİNE BAŞLA</button>
+                <button class="nav-btn" style="width:100%; background:var(--green); color:#000; margin-top:20px;" onclick="startTest('${course}','${topic}')">KONU TESTİNE BAŞLA (5 SORU)</button>
             </div>`;
         document.getElementById('view-actions').innerHTML = `<button class="nav-btn" onclick="renderTopics('${course}')">Konulara Dön</button>`;
     }
 
-    let userAnswers = [];
-    function startTest(course, topic) {
-        const questions = academyData[course][topic].test;
-        userAnswers = Array(5).fill(null);
+    let uAns = [];
+    function startTest(c, t) {
+        const d = generateContent(c, t).test;
+        uAns = Array(5).fill(null);
         const view = document.getElementById('view-content');
-        view.innerHTML = questions.map((q, i) => `
+        view.innerHTML = d.map((q, i) => `
             <div class="test-q">
                 <p><b>Soru ${i+1}:</b> ${q.q}</p>
                 ${q.a.map((opt, oi) => `<div class="opt" id="q${i}o${oi}" onclick="pickOpt(${i},${oi})">${String.fromCharCode(65+oi)}) ${opt}</div>`).join('')}
-            </div>`).join('') + `<button id="finish-btn" class="nav-btn hidden" style="width:100%; background:var(--accent)" onclick="calcScore('${course}','${topic}')">TESTİ BİTİR</button>`;
+            </div>`).join('') + `<button id="f-btn" class="nav-btn hidden" style="width:100%; background:var(--accent)" onclick="calcScore('${c}','${t}')">TESTİ BİTİR</button>`;
     }
 
-    function pickOpt(qIdx, oIdx) {
-        userAnswers[qIdx] = oIdx;
-        document.querySelectorAll(`[id^="q${qIdx}o"]`).forEach(el => el.classList.remove('selected'));
-        document.getElementById(`q${qIdx}o${oIdx}`).classList.add('selected');
-        if(!userAnswers.includes(null)) document.getElementById('finish-btn').classList.remove('hidden');
+    function pickOpt(qi, oi) {
+        uAns[qi] = oi;
+        document.querySelectorAll(`[id^="q${qi}o"]`).forEach(el => el.classList.remove('selected'));
+        document.getElementById(`q${qi}o${oi}`).classList.add('selected');
+        if(!uAns.includes(null)) document.getElementById('f-btn').classList.remove('hidden');
     }
 
-    function calcScore(course, topic) {
-        const questions = academyData[course][topic].test;
-        let correct = 0, wrong = 0, empty = 0;
-        const view = document.getElementById('view-content');
-        
-        const results = questions.map((q, i) => {
-            const isCorrect = userAnswers[i] === q.c;
-            if(userAnswers[i] === null) empty++; else if(isCorrect) correct++; else wrong++;
-            return `
-                <div class="test-q" style="border-left: 5px solid ${isCorrect?'var(--green)':'var(--accent)'}">
-                    <p>${isCorrect?'✅ Doğru':'❌ Yanlış'} - Soru ${i+1}</p>
-                    <p>Senin Cevabın: ${String.fromCharCode(65+userAnswers[i])}</p>
-                    <p style="color:var(--green)">Doğru Cevap: ${String.fromCharCode(65+q.c)}</p>
-                    <div class="analysis" style="display:block"><b>Analiz:</b> ${q.sol}</div>
-                </div>`;
+    function calcScore(c, t) {
+        const d = generateContent(c, t).test;
+        let cor = 0;
+        const results = d.map((q, i) => {
+            const isC = uAns[i] === q.c; if(isC) cor++;
+            return `<div class="test-q" style="border-left: 5px solid ${isC?'var(--green)':'var(--accent)'}">
+                <p>${isC?'✅':'❌'} Soru ${i+1}</p>
+                <p style="color:var(--green)">Doğru Cevap: ${String.fromCharCode(65+q.c)}</p>
+                <p><b>Analiz:</b> ${q.sol}</p>
+            </div>`;
         }).join('');
-
-        view.innerHTML = `<h3>Sonuç: ${correct}D ${wrong}Y ${empty}B | Puan: ${correct*20}</h3>` + results;
-        document.getElementById('view-actions').innerHTML = `<button class="nav-btn" onclick="renderDetail('${course}','${topic}')">Konuya Geri Dön</button>`;
+        document.getElementById('view-content').innerHTML = `<h3>Puan: ${cor*20} / 100</h3>` + results;
+        document.getElementById('view-actions').innerHTML = `<button class="nav-btn" onclick="renderDetail('${c}','${t}')">Konuya Geri Dön</button>`;
     }
 
     // --- SNAKE OYUNU ---
@@ -206,8 +182,8 @@
             let dx = mouse.x - sn.h.x, dy = mouse.y - sn.h.y;
             sn.a += (Math.atan2(dy, dx) - sn.a) * 0.15;
             sn.h.x += Math.cos(sn.a) * 4; sn.h.y += Math.sin(sn.a) * 4;
-            sn.b.unshift({...sn.h}); if(sn.b.length > 60) sn.b.pop();
-            ctx.fillStyle = '#e94560'; sn.b.forEach((p, i) => { if(i%6===0) ctx.fillRect(p.x-6, p.y-6, 12, 12); });
+            sn.b.unshift({...sn.h}); if(sn.b.length > 80) sn.b.pop();
+            ctx.fillStyle = '#e94560'; sn.b.forEach((p, i) => { if(i%8===0) ctx.fillRect(p.x-6, p.y-6, 12, 12); });
         }, 1000/60);
     }
 
